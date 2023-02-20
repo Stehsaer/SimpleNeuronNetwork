@@ -9,6 +9,12 @@
 
 namespace Network
 {
+	/*
+	CHANGELOG:
+
+		2023-2-20:
+			MODIFY ReadMnistData(...) Logic; cut down memory space needed
+	*/
 	class NetworkDataParser
 	{
 	public:

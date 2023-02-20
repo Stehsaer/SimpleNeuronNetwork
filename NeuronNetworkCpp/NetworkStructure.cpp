@@ -3,14 +3,17 @@
 
 using namespace Network;
 
-Neuron::Neuron(int weightCount)
+Neuron::Neuron(int _weightCount)
 {
 	// initialize parameters
-	this->weightCount = weightCount;
+	weightCount = _weightCount; 
 	value = 0.0;
 	error = 0.0;
 
-	weights = new double[weightCount];
+	if (weightCount > 0)
+		weights = new double[weightCount];
+	else
+		weights = nullptr;
 }
 
 void Neuron::InitWeights(double val)
@@ -63,24 +66,14 @@ Neuron& NeuronLayer::operator[](int index)
 
 void NeuronLayer::RandomizeAllWeights(double min, double max)
 {
-	std::mt19937 rnd(std::random_device{}());
+	std::mt19937 rnd((int)this);
 	std::uniform_real_distribution<double> dist(min, max);
 
 	for (auto& neuron : neurons)
 	{
-		for (int i = 0; i < prevCount; i++)
+		for (int i = 0; i < neuron.weightCount; i++)
 		{
 			neuron.weights[i] = dist(rnd);
 		}
 	}
-}
-
-
-NeuronLayer::~NeuronLayer()
-{
-	for (auto& neuron : neurons)
-	{
-		free(neuron.weights);
-	}
-	neurons.clear();
 }

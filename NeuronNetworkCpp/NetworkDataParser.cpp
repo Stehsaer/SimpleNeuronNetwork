@@ -88,24 +88,16 @@ void NetworkDataParser::ReadMNISTData(NetworkDataSet* dataSet, std::string dataP
 	int dataWidth = GetInt32(data, DataWidthOffset);
 	int dataHeight = GetInt32(data, DataHeightOffset);
 
-	// NOTE: will eat large amount of memory space! proceed with caution!
-	double* normalizedData = Algorithm::NormalizeData(data, dataWidth * dataHeight * dataCount, mode);
-
-	if (!normalizedData)
-	{
-		throw "No enough memory space.";
-	}
-
-	delete[] data;
-
 	// push data
 	for (int i = 0; i < dataCount; i++)
 	{
-		dataSet->AddData(new NetworkData(
-			normalizedData + DataOffset + i * dataWidth * dataHeight,
-			*(label + LabelOffset + i),
-			dataWidth * dataHeight
-		));
+		// NOTE: Added 2023-2-20
+		NetworkData* networkdata = new NetworkData();
+		networkdata->label = *(label + LabelOffset + i);
+		networkdata->data = Algorithm::NormalizeData(data, DataOffset + i * dataWidth * dataHeight, dataWidth * dataHeight, mode);
+		networkdata->dataSize = dataWidth * dataHeight;
+		
+		dataSet->AddData(networkdata);
 	}
 
 	dataSet->dataHeight = dataHeight;
@@ -113,7 +105,7 @@ void NetworkDataParser::ReadMNISTData(NetworkDataSet* dataSet, std::string dataP
 
 	// free allocated spaces
 	delete[] label;
-	delete[] normalizedData;
+	delete[] data;
 }
 
 void NetworkDataParser::SaveNetworkData(std::string outputPath, Network::Framework::BackPropaNetwork& network)

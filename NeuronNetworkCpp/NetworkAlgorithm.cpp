@@ -34,46 +34,47 @@ double Network::Algorithm::ReLU_D(double x)
 	return x > 0.0 ? 1.0 : 0.0;
 }
 
-void Normalization_ZeroToOne(double* dataOut, unsigned char* data, int dataSize)
+// NOTE: Added offset (2023-2-20)
+void Normalization_ZeroToOne(float* dataOut, int offset, unsigned char* data, int dataSize)
 {
 	for (int i = 0; i < dataSize; i++)
 	{
-		dataOut[i] = data[i] / 256.0;
+		dataOut[i] = data[i + offset] / 256.0;
 	}
 }
 
-void Normalization_MinusOneToOne(double* dataOut, unsigned char* data, int dataSize)
+void Normalization_MinusOneToOne(float* dataOut, int offset, unsigned char* data, int dataSize)
 {
 	for (int i = 0; i < dataSize; i++)
 	{
-		dataOut[i] = data[i] / 128.0 - 1.0;
+		dataOut[i] = data[i + offset] / 128.0 - 1.0;
 	}
 }
 
-void Normalization_NoNormalization(double* dataOut, unsigned char* data, int dataSize)
+void Normalization_NoNormalization(float* dataOut, int offset, unsigned char* data, int dataSize)
 {
 	for (int i = 0; i < dataSize; i++)
 	{
-		dataOut[i] = data[i];
+		dataOut[i] = data[i + offset];
 	}
 }
 
-double* Network::Algorithm::NormalizeData(unsigned char* data, int dataSize, NormalizationMode mode)
+float* Network::Algorithm::NormalizeData(unsigned char* data, int offset, int dataSize, NormalizationMode mode)
 {
-	double* dataOut = new double[dataSize];
+	float* dataOut = new float[dataSize];
 
 	switch (mode)
 	{
 	case NormalizationMode::ZeroToOne:
-		Normalization_ZeroToOne(dataOut, data, dataSize);
+		Normalization_ZeroToOne(dataOut, offset, data, dataSize);
 		break;
 
 	case NormalizationMode::MinusOneToOne:
-		Normalization_MinusOneToOne(dataOut, data, dataSize);
+		Normalization_MinusOneToOne(dataOut, offset, data, dataSize);
 		break;
 
 	default:
-		Normalization_NoNormalization(dataOut, data, dataSize);
+		Normalization_NoNormalization(dataOut, offset, data, dataSize);
 		break;
 	}
 

@@ -9,6 +9,16 @@ namespace Network
 {
 	namespace Framework
 	{
+		/* 
+		CHANGE LOG: 
+
+			2023-2-20:
+				DELETE	unused inputData variable(double*); Significantly cut down memory space needed
+				DELETE	unused PushData(float);
+				MODIFY	PushData Logic;
+				ADD		PushData(float* data); Add capability for float type
+				ADD		GetResult(float* data);
+		*/
 		class BackPropaNetwork
 		{
 		public:
@@ -25,15 +35,15 @@ namespace Network
 
 			// training parameters
 			double learningRate, loss;
-			double* inputData, * targetData;
-
+			double * targetData; 
+			
 			BackPropaNetwork(int inNeuronCount, int outNeuronCount, int hiddenNeuronCount, int hiddenLayerCount, double (*ForwardFunc)(double), double (*BackwardFunc)(double), double learningRate);
 			
 			double GetLoss();
 			void RandomizeAllWeights(double min, double max);
 			void SetAllWeights(double weight);
-			void PushData(double* data);
-			void PushTarget(double* data);
+			void PushDataDouble(double* data);
+			void PushDataFloat(float* data);
 			void ForwardTransmit();
 			void BackwardTransmit();
 			void UpdateWeights();
@@ -42,8 +52,10 @@ namespace Network
 
 			int FindLargestOutput();
 
-			int GetResult(NetworkData& data);
-			int GetResult(double* data);
+			int GetResultNetworkData(NetworkData& data);
+			int GetResultDouble(double* data);
+			int GetResultFloat(float* data);
+
 			double GetAccuracy(NetworkDataSet& set);
 
 		private:

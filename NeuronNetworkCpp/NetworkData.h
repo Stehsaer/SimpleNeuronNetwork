@@ -13,13 +13,20 @@
 
 namespace Network
 {
+	/* 
+	CHANGE LOG:
+		
+		2023-2-20:
+			CHANGE data storing type from double to float; cut down memory space needed
+			CHANGE NetworkData(double*,int,int) to NetworkData(); move initialization function to NetworkDataParser
+	*/
 	struct NetworkData
 	{
 	public:
-		double* data;
+		float* data;
 		int label, dataSize;
 
-		NetworkData(double* data, int label, int dataSize);
+		NetworkData();
 		void DrawContentDebug(int width, Algorithm::NormalizationMode mode);
 	};
 
