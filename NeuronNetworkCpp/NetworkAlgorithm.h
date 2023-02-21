@@ -5,6 +5,12 @@
 
 namespace Network
 {
+	/*
+	CHANGELOG:
+
+		2023-2-20:
+			MODIFY NormalizeData(...); Added offset option and flexibility that comes along; Change output type from double to float
+	*/
 	namespace Algorithm
 	{
 		enum NormalizationMode
@@ -21,7 +27,7 @@ namespace Network
 		double ReLU(double x);
 		double ReLU_D(double x);
 
-		double* NormalizeData(unsigned char* data, int dataSize, NormalizationMode mode);
+		float* NormalizeData(unsigned char* data, int offset, int dataSize, NormalizationMode mode);
 
 		void SoftMax(NeuronLayer& layer);
 		void SoftMaxGetError(NeuronLayer& layer, double* target);

@@ -1,5 +1,5 @@
 ﻿#include "NetworkData.h"
-#include "json/json.h"
+//#include "json/json.h"
 
 #include "NetworkAlgorithm.h"
 
@@ -7,13 +7,12 @@ using namespace std::filesystem;
 
 using namespace Network;
 
-NetworkData::NetworkData(double* data, int label, int dataSize)
+// Modified 2023-2-20
+NetworkData::NetworkData()
 {
-	this->data = new double[dataSize];
-	memcpy(this->data, data, sizeof(double) * dataSize); // copy data
-
-	this->label = label;
-	this->dataSize = dataSize;
+	this->data = nullptr;
+	this->label = -1;
+	this->dataSize = -1;
 }
 
 void NetworkData::DrawContentDebug(int width, Algorithm::NormalizationMode mode)

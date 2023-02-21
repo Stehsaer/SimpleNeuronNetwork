@@ -1,7 +1,5 @@
 #include "NetworkDataParser.h"
 
-#include "json/json.h"
-
 #define _FILE_OP_SAFE_
 
 using namespace std::filesystem;
@@ -28,7 +26,7 @@ int GetInt32(unsigned char* data, int offset, bool reverse = true)
 void NetworkDataParser::ReadMNISTData(NetworkDataSet* dataSet, std::string dataPath, std::string labelPath, Network::Algorithm::NormalizationMode mode)
 {
 	// check if file is valid
-	if (!is_regular_file(dataPath) || !is_regular_file(labelPath))
+	if (!is_regular_file(dataPath) || !is_regular_file(labelPath) || !exists(dataPath) || !exists(labelPath))
 	{
 		throw "Invalid file input.";
 	}
@@ -88,24 +86,16 @@ void NetworkDataParser::ReadMNISTData(NetworkDataSet* dataSet, std::string dataP
 	int dataWidth = GetInt32(data, DataWidthOffset);
 	int dataHeight = GetInt32(data, DataHeightOffset);
 
-	// NOTE: will eat large amount of memory space! proceed with caution!
-	double* normalizedData = Algorithm::NormalizeData(data, dataWidth * dataHeight * dataCount, mode);
-
-	if (!normalizedData)
-	{
-		throw "No enough memory space.";
-	}
-
-	delete[] data;
-
 	// push data
 	for (int i = 0; i < dataCount; i++)
 	{
-		dataSet->AddData(new NetworkData(
-			normalizedData + DataOffset + i * dataWidth * dataHeight,
-			*(label + LabelOffset + i),
-			dataWidth * dataHeight
-		));
+		// NOTE: Added 2023-2-20
+		NetworkData* networkdata = new NetworkData();
+		networkdata->label = *(label + LabelOffset + i);
+		networkdata->data = Algorithm::NormalizeData(data, DataOffset + i * dataWidth * dataHeight, dataWidth * dataHeight, mode);
+		networkdata->dataSize = dataWidth * dataHeight;
+		
+		dataSet->AddData(networkdata);
 	}
 
 	dataSet->dataHeight = dataHeight;
@@ -113,31 +103,5 @@ void NetworkDataParser::ReadMNISTData(NetworkDataSet* dataSet, std::string dataP
 
 	// free allocated spaces
 	delete[] label;
-	delete[] normalizedData;
-}
-
-void NetworkDataParser::SaveNetworkData(std::string outputPath, Network::Framework::BackPropaNetwork& network)
-{
-	Json::Value outValue;
-
-	outValue["inNeuronCount"] = network.inNeuronCount;
-	outValue["outNeuronCount"] = network.outNeuronCount;
-	outValue["hiddenLayerCount"] = network.hiddenLayerCount;
-	outValue["hiddenNeuronCount"] = network.hiddenNeuronCount;
-
-	for (int i = 0; i < network.hiddenLayerCount; i++)
-	{
-		outValue["HiddenLayers"]["bias"] = network.hiddenLayerList[i].bias;
-		outValue["HiddenLayers"]["prevCount"] = network.hiddenLayerList[i].prevCount;
-
-		for (int j = 0; j < network.hiddenNeuronCount; j++)
-		{
-			outValue["hiddenLayers"]["neurons"][j]["weightCount"] = network.hiddenLayerList[i][j].weightCount;
-
-			for (int m = 0; m < network.hiddenLayerList[i].prevCount; m++)
-			{
-				outValue["hiddenLayers"]["neurons"][j]["weights"][m] = network.hiddenLayerList[i][j].weights[m];
-			}
-		}
-	}
+	delete[] data;
 }

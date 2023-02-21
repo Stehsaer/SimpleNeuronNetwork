@@ -4,6 +4,8 @@
 #include "NetworkAlgorithm.h"
 #include "NetworkData.h"
 
+#include <float.h>
+
 using namespace Network::Framework;
 using namespace Network::Algorithm;
 
@@ -21,8 +23,7 @@ BackPropaNetwork::BackPropaNetwork(int inNeuronCount, int outNeuronCount, int hi
 	this->hiddenLayerCount = hiddenLayerCount;
 	this->learningRate = learningRate;
 	this->loss = 0.0;
-	this->inputData = nullptr;
-	this->targetData = nullptr;
+	this->targetData = new double[outNeuronCount];
 
 	ForwardActive = ForwardFunc;
 	BackwardActive = BackwardFunc;
@@ -51,7 +52,6 @@ double BackPropaNetwork::GetLoss()
 
 void BackPropaNetwork::RandomizeAllWeights(double min, double max)
 {
-	inLayer.RandomizeAllWeights(min, max);
 	outLayer.RandomizeAllWeights(min, max);
 
 	for (auto& layer : hiddenLayerList)
@@ -71,25 +71,24 @@ void BackPropaNetwork::SetAllWeights(double weight)
 	}
 }
 
-void BackPropaNetwork::PushData(double* data)
+// Modified 2023-2-20
+
+void BackPropaNetwork::PushDataDouble(double* data)
 {
-	if (inputData) delete[] inputData;
-
-	inputData = new double[inNeuronCount];
-	memcpy(inputData, data, inNeuronCount * sizeof(double)); // copy data
-
 	for (int i = 0; i < inNeuronCount; i++)
 	{
-		inLayer[i].value = inputData[i];
+		inLayer[i].value = data[i];
 	}
 }
 
-void BackPropaNetwork::PushTarget(double* target)
-{
-	if (targetData) delete[] targetData;
+// Added 2023-2-20
 
-	targetData = new double[outNeuronCount];
-	memcpy(targetData, target, outNeuronCount * sizeof(double)); // copy data
+void BackPropaNetwork::PushDataFloat(float *data)
+{
+	for (int i = 0; i < inNeuronCount; i++)
+	{
+		inLayer[i].value = (double)data[i];
+	}
 }
 
 void BackPropaNetwork::ForwardTransmitLayer(NeuronLayer& obj, NeuronLayer& prev) 
@@ -198,25 +197,33 @@ int BackPropaNetwork::FindLargestOutput()
 	return biggestNeuron;
 }
 
-int BackPropaNetwork::GetResult(double* data)
+int BackPropaNetwork::GetResultDouble(double* data)
 {
-	PushData(data);
+	PushDataDouble(data);
 	ForwardTransmit();
 	return FindLargestOutput();
 }
 
-int BackPropaNetwork::GetResult(NetworkData& data)
+// Added 2023-2-20
+int BackPropaNetwork::GetResultFloat(float* data)
 {
-	return GetResult(data.data);
+	PushDataFloat(data);
+	ForwardTransmit();
+	return FindLargestOutput();
+}
+
+int BackPropaNetwork::GetResultNetworkData(NetworkData& data)
+{
+	return GetResultFloat(data.data);
 }
 
 double BackPropaNetwork::GetAccuracy(NetworkDataSet& set)
 {
 	int correctCount = 0;
 
-	for (auto data : set.dataSet)
+	for (auto& data : set.dataSet)
 	{
-		int label_out = GetResult(*data);
+		int label_out = GetResultNetworkData(*data);
 		if (label_out == data->label)
 		{
 			correctCount++;
@@ -226,12 +233,11 @@ double BackPropaNetwork::GetAccuracy(NetworkDataSet& set)
 	return (double)correctCount / (double)set.Count();
 }
 
+// NOTE: 2023-2-20 Fixed wrong targetData generation process
+
 void BackPropaNetwork::Train(NetworkData& data, int maxIterCount, double threshold)
 {
-	PushData(data.data);
-
-	// generate one-hot label
-	targetData = new double[outNeuronCount];
+	PushDataFloat(data.data);
 
 	for (int i = 0; i < outNeuronCount; i++)
 	{

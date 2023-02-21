@@ -1,2 +1,0 @@
-This folder contains files for JsonCpp
-original link: https://github.com/open-source-parsers/jsoncpp
