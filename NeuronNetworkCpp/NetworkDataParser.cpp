@@ -1,8 +1,8 @@
 #include "NetworkDataParser.h"
 
-#include "json/json.h"
+//#include "json/json.h"
 
-#define _FILE_OP_SAFE_
+//#define _FILE_OP_SAFE_
 
 using namespace std::filesystem;
 using namespace Network;
@@ -108,7 +108,7 @@ void NetworkDataParser::ReadMNISTData(NetworkDataSet* dataSet, std::string dataP
 	delete[] data;
 }
 
-void NetworkDataParser::SaveNetworkData(std::string outputPath, Network::Framework::BackPropaNetwork& network)
+/*void NetworkDataParser::SaveNetworkData(std::string outputPath, Network::Framework::BackPropaNetwork& network)
 {
 	Json::Value outValue;
 
@@ -132,4 +132,4 @@ void NetworkDataParser::SaveNetworkData(std::string outputPath, Network::Framewo
 			}
 		}
 	}
-}
+}*/

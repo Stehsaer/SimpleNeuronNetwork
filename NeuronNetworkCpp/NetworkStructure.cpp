@@ -66,7 +66,7 @@ Neuron& NeuronLayer::operator[](int index)
 
 void NeuronLayer::RandomizeAllWeights(double min, double max)
 {
-	std::mt19937 rnd((int)this);
+	std::mt19937 rnd(std::random_device{}());
 	std::uniform_real_distribution<double> dist(min, max);
 
 	for (auto& neuron : neurons)
