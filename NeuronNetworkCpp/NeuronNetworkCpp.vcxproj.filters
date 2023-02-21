@@ -13,12 +13,6 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="头文件\jsoncpp">
-      <UniqueIdentifier>{a8d01333-c15d-4373-b189-6d964c407bea}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="源文件\jsoncpp">
-      <UniqueIdentifier>{3b0b019b-2770-4998-9d24-60c60efa7b12}</UniqueIdentifier>
-    </Filter>
     <Filter Include="源文件\Network">
       <UniqueIdentifier>{baf0c04c-d8c8-43bc-8df9-5e6f8b024138}</UniqueIdentifier>
     </Filter>
@@ -29,15 +23,6 @@
   <ItemGroup>
     <ClCompile Include="main.cpp">
       <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="jsoncpp\json_writer.cpp">
-      <Filter>源文件\jsoncpp</Filter>
-    </ClCompile>
-    <ClCompile Include="jsoncpp\json_reader.cpp">
-      <Filter>源文件\jsoncpp</Filter>
-    </ClCompile>
-    <ClCompile Include="jsoncpp\json_value.cpp">
-      <Filter>源文件\jsoncpp</Filter>
     </ClCompile>
     <ClCompile Include="NetworkStructure.cpp">
       <Filter>源文件\Network</Filter>
@@ -56,39 +41,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="jsoncpp\json_tool.h">
-      <Filter>头文件\jsoncpp</Filter>
-    </ClInclude>
-    <ClInclude Include="jsoncpp\reader.h">
-      <Filter>头文件\jsoncpp</Filter>
-    </ClInclude>
-    <ClInclude Include="jsoncpp\value.h">
-      <Filter>头文件\jsoncpp</Filter>
-    </ClInclude>
-    <ClInclude Include="jsoncpp\version.h">
-      <Filter>头文件\jsoncpp</Filter>
-    </ClInclude>
-    <ClInclude Include="jsoncpp\writer.h">
-      <Filter>头文件\jsoncpp</Filter>
-    </ClInclude>
-    <ClInclude Include="jsoncpp\allocator.h">
-      <Filter>头文件\jsoncpp</Filter>
-    </ClInclude>
-    <ClInclude Include="jsoncpp\assertions.h">
-      <Filter>头文件\jsoncpp</Filter>
-    </ClInclude>
-    <ClInclude Include="jsoncpp\config.h">
-      <Filter>头文件\jsoncpp</Filter>
-    </ClInclude>
-    <ClInclude Include="jsoncpp\forwards.h">
-      <Filter>头文件\jsoncpp</Filter>
-    </ClInclude>
-    <ClInclude Include="jsoncpp\json.h">
-      <Filter>头文件\jsoncpp</Filter>
-    </ClInclude>
-    <ClInclude Include="jsoncpp\json_features.h">
-      <Filter>头文件\jsoncpp</Filter>
-    </ClInclude>
     <ClInclude Include="NetworkStructure.h">
       <Filter>头文件\Network Headers</Filter>
     </ClInclude>
@@ -107,10 +59,5 @@
     <ClInclude Include="Network.h">
       <Filter>头文件\Network Headers</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="jsoncpp\json_valueiterator.inl">
-      <Filter>源文件\jsoncpp</Filter>
-    </None>
   </ItemGroup>
 </Project>

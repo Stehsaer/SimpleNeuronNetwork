@@ -1,8 +1,6 @@
 #include "NetworkDataParser.h"
 
-//#include "json/json.h"
-
-//#define _FILE_OP_SAFE_
+#define _FILE_OP_SAFE_
 
 using namespace std::filesystem;
 using namespace Network;
@@ -107,29 +105,3 @@ void NetworkDataParser::ReadMNISTData(NetworkDataSet* dataSet, std::string dataP
 	delete[] label;
 	delete[] data;
 }
-
-/*void NetworkDataParser::SaveNetworkData(std::string outputPath, Network::Framework::BackPropaNetwork& network)
-{
-	Json::Value outValue;
-
-	outValue["inNeuronCount"] = network.inNeuronCount;
-	outValue["outNeuronCount"] = network.outNeuronCount;
-	outValue["hiddenLayerCount"] = network.hiddenLayerCount;
-	outValue["hiddenNeuronCount"] = network.hiddenNeuronCount;
-
-	for (int i = 0; i < network.hiddenLayerCount; i++)
-	{
-		outValue["HiddenLayers"]["bias"] = network.hiddenLayerList[i].bias;
-		outValue["HiddenLayers"]["prevCount"] = network.hiddenLayerList[i].prevCount;
-
-		for (int j = 0; j < network.hiddenNeuronCount; j++)
-		{
-			outValue["hiddenLayers"]["neurons"][j]["weightCount"] = network.hiddenLayerList[i][j].weightCount;
-
-			for (int m = 0; m < network.hiddenLayerList[i].prevCount; m++)
-			{
-				outValue["hiddenLayers"]["neurons"][j]["weights"][m] = network.hiddenLayerList[i][j].weights[m];
-			}
-		}
-	}
-}*/
