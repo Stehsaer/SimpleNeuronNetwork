@@ -28,7 +28,7 @@ int GetInt32(unsigned char* data, int offset, bool reverse = true)
 void NetworkDataParser::ReadMNISTData(NetworkDataSet* dataSet, std::string dataPath, std::string labelPath, Network::Algorithm::NormalizationMode mode)
 {
 	// check if file is valid
-	if (!is_regular_file(dataPath) || !is_regular_file(labelPath))
+	if (!is_regular_file(dataPath) || !is_regular_file(labelPath) || !exists(dataPath) || !exists(labelPath))
 	{
 		throw "Invalid file input.";
 	}
