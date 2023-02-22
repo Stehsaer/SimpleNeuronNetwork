@@ -59,5 +59,8 @@
     <ClInclude Include="Network.h">
       <Filter>头文件\Network Headers</Filter>
     </ClInclude>
+    <ClInclude Include="DebugOutput.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

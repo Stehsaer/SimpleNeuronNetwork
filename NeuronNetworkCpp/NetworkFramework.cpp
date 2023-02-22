@@ -256,3 +256,31 @@ void BackPropaNetwork::Train(NetworkData& data, int maxIterCount, double thresho
 		UpdateWeights();
 	}
 }
+
+void ClearNeuron(Network::Neuron* neuron)
+{
+	if (neuron->weightCount > 0)
+		free(neuron->weights);
+}
+
+void BackPropaNetwork::Destroy()
+{
+	// Clear neuron data
+	inLayer.neurons.clear();
+
+	for (Neuron& neuron : outLayer.neurons)
+		ClearNeuron(&neuron);
+	outLayer.neurons.clear();
+
+	for (NeuronLayer& layer : hiddenLayerList)
+	{
+		for (Neuron& neuron : layer.neurons)
+			ClearNeuron(&neuron);
+		layer.neurons.clear();
+	}
+
+	hiddenLayerList.clear();
+
+	// Clear target data
+	if (targetData) delete[] targetData;
+}

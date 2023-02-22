@@ -30,8 +30,8 @@ namespace Network
 		static const int LabelMagicNumber = 2049;
 
 		static void ReadMNISTData(NetworkDataSet* dataSet, std::string dataPath, std::string labelPath, Network::Algorithm::NormalizationMode mode);
-		static void SaveNetworkData(std::string outputPath, Network::Framework::BackPropaNetwork& network);
-		static void AddDataFromImage(NetworkDataSet* dataset, std::string imagePath, Network::Algorithm::NormalizationMode mode);
+		static void SaveNetworkData(Network::Framework::BackPropaNetwork* network, std::string path);
+		static Network::Framework::BackPropaNetwork ReadNetworkData(std::string path);
 	};
 }
 
