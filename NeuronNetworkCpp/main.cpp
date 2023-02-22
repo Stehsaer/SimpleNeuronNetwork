@@ -19,7 +19,7 @@ void PrintProgress(int* progress, int max, bool* doCycle, int interval)
 	{
 		int percent = *progress * 100 / max;
 
-		printf("\n> %d/%d %d%%", *progress, max, percent);
+		printf("\r> %d/%d %d%%", *progress, max, percent);
 
 #ifdef _OS_WINDOWS_
 		Sleep(interval);
@@ -56,17 +56,17 @@ int main()
 
 	printf("Data fetched. \nDetail: Trainset:%d files, Verifyset:%d files\n\n", dataSet.Count(), verifySet.Count());
 
-	Network::Framework::BackPropaNetwork network(28 * 28, 62, 64, 1, &Network::Algorithm::ReLU, &Network::Algorithm::ReLU_D, 0.1);
+	Network::Framework::BackPropaNetwork network(28 * 28, 10, 64, 1, &Network::Algorithm::ReLU, &Network::Algorithm::ReLU_D, 0.1);
 
 	network.RandomizeAllWeights(0.1, 1.0);
 
 	int progress = 0;
 
-	for (int epoch = 0; epoch < 10; epoch++)
+	for (int epoch = 0; epoch < 1; epoch++)
 	{
 		bool updateProgress = true;
 
-		std::thread thr(PrintProgress, &progress, dataSet.Count(), &updateProgress, 1000);
+		std::thread thr(PrintProgress, &progress, dataSet.Count(), &updateProgress, 100);
 		thr.detach();
 
 		for (progress = 0; progress < dataSet.Count(); progress++)
@@ -79,10 +79,17 @@ int main()
 		printf("\nVerifying...");
 		double accuracy = network.GetAccuracy(verifySet);
 
-		printf("\rFinished Epoch %d, Accuracy: %.3f%%\n", epoch + 1, accuracy * 100.0);
+		printf("\rFinished Epoch %d, Accuracy: %.2f%%\n", epoch + 1, accuracy * 100.0);
 
 		network.learningRate /= 2.0;
 	}
+
+	Network::NetworkDataParser::SaveNetworkData(&network, "D:/out.bin");
+	network = Network::NetworkDataParser::ReadNetworkData("D:/out.bin");
+
+	double accuracy = network.GetAccuracy(verifySet);
+
+	printf("\rRead data, Accuracy: %.2f%%\n", accuracy * 100.0);
 
 	return 0;
 }

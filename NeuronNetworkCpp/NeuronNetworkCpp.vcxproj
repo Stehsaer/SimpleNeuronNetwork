@@ -145,6 +145,7 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="DebugOutput.h" />
     <ClInclude Include="Network.h" />
     <ClInclude Include="NetworkAlgorithm.h" />
     <ClInclude Include="NetworkData.h" />

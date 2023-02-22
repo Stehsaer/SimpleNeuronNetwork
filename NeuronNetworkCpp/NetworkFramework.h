@@ -9,16 +9,6 @@ namespace Network
 {
 	namespace Framework
 	{
-		/* 
-		CHANGE LOG: 
-
-			2023-2-20:
-				DELETE	unused inputData variable(double*); Significantly cut down memory space needed
-				DELETE	unused PushData(float);
-				MODIFY	PushData Logic;
-				ADD		PushData(float* data); Add capability for float type
-				ADD		GetResult(float* data);
-		*/
 		class BackPropaNetwork
 		{
 		public:
@@ -57,6 +47,8 @@ namespace Network
 			int GetResultFloat(float* data);
 
 			double GetAccuracy(NetworkDataSet& set);
+
+			void Destroy();
 
 		private:
 			void ForwardTransmitLayer(NeuronLayer& obj, NeuronLayer& prev);
