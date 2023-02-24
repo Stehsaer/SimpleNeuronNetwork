@@ -1,5 +1,6 @@
 #include "NetworkDataParser.h"
-#include "DebugOutput.h"
+#include "Message.h"
+#include "Output.h"
 
 #define _FILE_OP_SAFE_
 
@@ -37,12 +38,13 @@ int GetInt32Reverse(unsigned char* data, int offset)
 	return out;
 }
 
-void NetworkDataParser::ReadMNISTData(NetworkDataSet* dataSet, std::string dataPath, std::string labelPath, Network::Algorithm::NormalizationMode mode)
+bool NetworkDataParser::ReadMNISTData(NetworkDataSet* dataSet, std::string dataPath, std::string labelPath, Network::Algorithm::NormalizationMode mode, bool verbose)
 {
 	// check if file is valid
 	if (!is_regular_file(dataPath) || !is_regular_file(labelPath) || !exists(dataPath) || !exists(labelPath))
 	{
-		throw "Invalid file input.";
+		PrintError(MSG_NO_SUCH_FILE, verbose);
+		return false;
 	}
 
 	// fetch data from file
@@ -61,7 +63,8 @@ void NetworkDataParser::ReadMNISTData(NetworkDataSet* dataSet, std::string dataP
 	// check if files get opened correctly
 	if (!dataFileObj || !labelFileObj)
 	{
-		throw "Can't open files.";
+		PrintError(MSG_CANT_OPEN_FILE, verbose);
+		return false;
 	}
 
 	// read data
@@ -85,7 +88,11 @@ void NetworkDataParser::ReadMNISTData(NetworkDataSet* dataSet, std::string dataP
 	// check magic number
 	if (dataMagicNumber != DataMagicNumber || labelMagicNumber != LabelMagicNumber)
 	{
-		throw "Magic numbers mismatch.";
+		PrintError(MSG_READ_ERR, verbose);
+		
+		delete[] data;
+		delete[] label;
+		return false;
 	}
 
 	int dataCount = GetInt32Reverse(data, DataCountOffset);
@@ -94,7 +101,11 @@ void NetworkDataParser::ReadMNISTData(NetworkDataSet* dataSet, std::string dataP
 	// check if counts match
 	if (dataCount != labelCount)
 	{
-		throw "Data and label count mismatch.";
+		PrintError(MSG_READ_ERR, verbose);
+
+		delete[] data;
+		delete[] label;
+		return false;
 	}
 
 	int dataWidth = GetInt32Reverse(data, DataWidthOffset);
@@ -115,9 +126,13 @@ void NetworkDataParser::ReadMNISTData(NetworkDataSet* dataSet, std::string dataP
 	dataSet->dataHeight = dataHeight;
 	dataSet->dataWidth = dataWidth;
 
+	dataSet->mode = mode;
+
 	// free allocated spaces
 	delete[] label;
 	delete[] data;
+
+	return true;
 }
 
 /*
@@ -225,7 +240,7 @@ void WriteData_Layer(NeuronLayer* layer, unsigned char** data)
 	*data = ptrNeuron;
 }
 
-void NetworkDataParser::SaveNetworkData(Network::Framework::BackPropaNetwork* network, std::string path)
+bool NetworkDataParser::SaveNetworkData(Network::Framework::BackPropaNetwork* network, std::string path, bool verbose)
 {
 	// Calculate required space
 	int lengthRequired = 0;
@@ -239,10 +254,6 @@ void NetworkDataParser::SaveNetworkData(Network::Framework::BackPropaNetwork* ne
 	}
 
 	lengthRequired += sizeof(int); // End data
-
-	// DEBUG
-	//printf("lengthRequired: %d\n", lengthRequired);
-	//system("pause");
 
 	unsigned char* data = new unsigned char[lengthRequired]; // Allocate space
 
@@ -298,7 +309,9 @@ void NetworkDataParser::SaveNetworkData(Network::Framework::BackPropaNetwork* ne
 
 	if (!file)
 	{
-		DebugOutput("Can't open file.", true);
+		PrintError(MSG_CANT_OPEN_FILE, verbose);
+		delete[] data;
+		return false;
 	}
 
 	fwrite(data, 1, lengthRequired, file);
@@ -306,47 +319,48 @@ void NetworkDataParser::SaveNetworkData(Network::Framework::BackPropaNetwork* ne
 
 	// free
 	delete[] data;
+
+	return true;
 }
 
-#define READ_ERR_MSG DebugOutput("Error while parsing file.", true)
-
-void ReadNetwork_Neuron(unsigned char** data, Neuron* neuron)
+bool ReadNetwork_Neuron(unsigned char** data, Neuron* neuron)
 {
 	unsigned char* ptr = *data;
 
 	// check magic number
 	if (GetInt32(ptr, 0x00) != NeuronDataMN)
 	{
-		READ_ERR_MSG;
+		return false;
 	}
 
 	// check weightCount
 	if (neuron->weightCount != GetInt32(ptr, 0x04))
 	{
-		READ_ERR_MSG;
+		return false;
 	}
 
 	ptr += 0x08; // go to data section
 	memcpy(neuron->weights, ptr, sizeof(double) * neuron->weightCount);
 
 	*data = ptr + sizeof(double) * neuron->weightCount;
+	return true;
 }
 
-void ReadNetwork_Layer(unsigned char** data, NeuronLayer* layer)
+bool ReadNetwork_Layer(unsigned char** data, NeuronLayer* layer)
 {
 	unsigned char* ptr = *data;
 
 	// check magic number
 	if (GetInt32(ptr, 0x00) != NeuronLayerMN)
 	{
-		READ_ERR_MSG;
+		return false;
 	}
 
 	// check count
 	if (layer->prevCount != GetInt32(ptr, 0x04)
 		|| layer->Count() != GetInt32(ptr, 0x08))
 	{
-		READ_ERR_MSG;
+		return false;
 	}
 
 	memcpy(&(layer->bias), ptr + 0x0c, sizeof(double)); // read bias
@@ -355,17 +369,22 @@ void ReadNetwork_Layer(unsigned char** data, NeuronLayer* layer)
 
 	for (Neuron& neuron : layer->neurons)
 	{
-		ReadNetwork_Neuron(&ptr, &neuron);
+		if (!ReadNetwork_Neuron(&ptr, &neuron))
+		{
+			return false;
+		}
 	}
 
 	*data = ptr;
+	return true;
 }
 
-Network::Framework::BackPropaNetwork NetworkDataParser::ReadNetworkData(std::string _path)
+bool NetworkDataParser::ReadNetworkData(Network::Framework::BackPropaNetwork** network, std::string _path, bool verbose)
 {
 	if (!exists(std::filesystem::path(_path)))
 	{
-		DebugOutput("File doesn't exists.", true);
+		PrintError(MSG_NO_SUCH_FILE, verbose);
+		return false;
 	}
 
 	// fetch file size
@@ -382,8 +401,11 @@ Network::Framework::BackPropaNetwork NetworkDataParser::ReadNetworkData(std::str
 
 	if (!file)
 	{
-		DebugOutput("Can't open file.", true);
+		PrintError(MSG_CANT_OPEN_FILE, verbose);
+		return false;
 	}
+
+	if(verbose) printf("Reading %d bytes from file...\n", filesize);
 
 	unsigned char* data = new unsigned char[filesize];
 
@@ -391,7 +413,13 @@ Network::Framework::BackPropaNetwork NetworkDataParser::ReadNetworkData(std::str
 	fclose(file);
 	
 	if (GetInt32(data, 0x00) != MetadataMN)
-		READ_ERR_MSG;
+	{
+		PrintError(MSG_READ_ERR, verbose);
+
+		delete[] data;
+
+		return false;
+	}
 
 	int inNeuronCount = GetInt32(data, 0x04);
 	int outNeuronCount = GetInt32(data, 0x08);
@@ -424,24 +452,53 @@ Network::Framework::BackPropaNetwork NetworkDataParser::ReadNetworkData(std::str
 	}
 
 
-	Network::Framework::BackPropaNetwork outNetwork(inNeuronCount, outNeuronCount, hiddenNeuronCount, hiddenLayerCount, ForwardActive, BackwardActive, DBL_MAX);
+	Network::Framework::BackPropaNetwork * nwk = new Network::Framework::BackPropaNetwork(inNeuronCount, outNeuronCount, hiddenNeuronCount, hiddenLayerCount, ForwardActive, BackwardActive, DBL_MAX);
+
+	if (verbose) printf("Parsing data...\n");
 
 	unsigned char* ptr = data + 0x18;
 
-	ReadNetwork_Layer(&ptr, &(outNetwork.outLayer));
-
-	for (auto& layer : outNetwork.hiddenLayerList)
+	if (!ReadNetwork_Layer(&ptr, &(nwk->outLayer)))
 	{
-		ReadNetwork_Layer(&ptr, &layer);
+		PrintError(MSG_READ_ERR, verbose);
+		(* network)->Destroy();
+
+		delete network;
+		delete[] data;
+
+		return false;
+	}
+
+	for (auto& layer : nwk->hiddenLayerList)
+	{
+		if (!ReadNetwork_Layer(&ptr, &layer))
+		{
+			PrintError(MSG_READ_ERR, verbose);
+			nwk->Destroy();
+
+			delete nwk;
+			delete[] data;
+
+			return false;
+		}
 	}
 
 	// check end data
 	if (GetInt32(ptr, 0x00) != EndDataMN)
 	{
-		READ_ERR_MSG;
+		PrintError(MSG_READ_ERR, verbose);
+		nwk->Destroy();
+
+		delete network;
+		delete[] data;
+
+		return false;
 	}
 
 	// free space
 	delete[] data;
-	return outNetwork;
+
+	*network = nwk;
+
+	return true;
 }

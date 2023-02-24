@@ -36,6 +36,8 @@ namespace Network
 		std::vector<NetworkData*> dataSet;
 		int dataWidth, dataHeight;
 
+		Network::Algorithm::NormalizationMode mode;
+
 		NetworkDataSet(): dataWidth(0), dataHeight(0) {}
 		int Count();
 		void AddData(NetworkData* data);

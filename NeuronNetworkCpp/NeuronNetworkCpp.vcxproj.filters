@@ -19,11 +19,11 @@
     <Filter Include="头文件\Network Headers">
       <UniqueIdentifier>{184138aa-6997-4486-a73b-460cde78573b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="源文件\main">
+      <UniqueIdentifier>{43b0f2c6-0722-4170-a8ec-8298bc1a4014}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="NetworkStructure.cpp">
       <Filter>源文件\Network</Filter>
     </ClCompile>
@@ -38,6 +38,9 @@
     </ClCompile>
     <ClCompile Include="NetworkDataParser.cpp">
       <Filter>源文件\Network</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp">
+      <Filter>源文件\main</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -59,8 +62,8 @@
     <ClInclude Include="Network.h">
       <Filter>头文件\Network Headers</Filter>
     </ClInclude>
-    <ClInclude Include="DebugOutput.h">
-      <Filter>头文件</Filter>
+    <ClInclude Include="Output.h">
+      <Filter>头文件\Network Headers</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
