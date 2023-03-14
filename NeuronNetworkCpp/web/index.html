@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8" />
+	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+	<title>Home</title>
+
+	<link href="mui.min.css" rel="stylesheet" type="text/css" />
+	<link href="material_style.css" rel="stylesheet" type="text/css" />
+	<link href="index_style.css" rel="stylesheet" type="text/css" />
+    <link href="material-colors.min.css" rel="stylesheet" type="text/css"/>
+    <link href="font.css" rel="stylesheet" type="text/css"/>
+
+	<link href="favicon.png" rel="shortcut icon" />
+
+	<script src="mui.min.js"></script>
+	<script src="jquery.min.js"></script>
+	<script src="material_appbar_script.js"></script>
+</head>
+
+<body class="hide-sidedrawer">
+	<div id="sidedrawer" class="mui--no-user-select mui--z2">
+		<div id="sidedrawer-brand" class="mui--appbar-line-height">
+			<span class="mui--text-title">Pages</span>
+		</div>
+		<div class="mui-divider"></div>
+		<ul>
+            <li>
+				<strong>Home</strong>
+				<ul>
+					<li><a href="#">Home Page</a></li>
+				</ul>
+			</li>
+			<li>
+				<strong>Recognization</strong>
+				<ul>
+					<li><a href="#">Hand Writing</a></li>
+				</ul>
+			</li>
+			<li>
+				<strong>Load & Train</strong>
+				<ul>
+					<li><a href="/manage_dataset.html">Manage Datasets</a></li>
+					<li><a href="#">Manage Model</a></li>
+				</ul>
+			</li>
+		</ul>
+	</div>
+	<header id="header">
+		<div class="mui-appbar mui--appbar-line-height mui--z1">
+			<div class="mui-container-fluid">
+				<a
+					class="sidedrawer-toggle mui--visible-xs-inline-block mui--visible-sm-inline-block js-show-sidedrawer">☰</a>
+				<a class="sidedrawer-toggle mui--hidden-xs mui--hidden-sm js-hide-sidedrawer">☰</a>
+				<span class="mui--text-title mui--visible-xs-inline-block mui--visible-sm-inline-block"
+					style="color: white; display: inline-block !important">Home</span>
+			</div>
+		</div>
+	</header>
+	<div id="content-wrapper">
+		<div class="mui--appbar-height"></div>
+        <br/>
+		<div class="mui-container-fluid" id="flex-wrapper">
+			<div class="mui-panel mui--z1 display-block" id="server-status-block">
+				<legend class="mui--text-headline">Status</legend>
+                <br/>
+				<b>Current status: </b><div class="inline-div" id="server-status-text"><span class="fg-red-400">Unknown</span></div>
+                <br/>
+                <b>Network status: </b><div class="inline-div" id="server-network-text">Unknown</div>
+                <br/>
+			</div>
+            <div class="mui-panel mui--z1 display-block" id="data-status-block">
+				<legend class="mui--text-headline">Datasets</legend>
+				<br/>
+                <table class="mui-table mui-table--bordered" id="dataset-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Size</th>
+                            <th>Count</th>
+                            <th>Est. Mem</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+
+                    </tbody>
+                </table>
+                <a href="manage_dataset.html" class="mui-btn mui-btn--primary">Manage</a>
+			</div>
+		</div>
+	</div>
+    <script src="query.js"></script>
+    <script src="index_script.js"></script>
+</body>
+
+</html>

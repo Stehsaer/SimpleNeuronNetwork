@@ -96,11 +96,21 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <OmitFramePointers>true</OmitFramePointers>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <DisableSpecificWarnings>26451; 26439; 4251; 4244;</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
+    <PostBuildEvent>
+      <Command>
+      </Command>
+    </PostBuildEvent>
+    <PreBuildEvent>
+      <Command>
+      </Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -113,6 +123,8 @@
       <LanguageStandard>stdcpp20</LanguageStandard>
       <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
       <OmitFramePointers>true</OmitFramePointers>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <DisableSpecificWarnings>26451; 26439; 4251; 4244;</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -120,6 +132,14 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
+    <PostBuildEvent>
+      <Command>
+      </Command>
+    </PostBuildEvent>
+    <PreBuildEvent>
+      <Command>
+      </Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -129,11 +149,21 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <OmitFramePointers>true</OmitFramePointers>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <DisableSpecificWarnings>26451; 26439; 4251; 4244;</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
+    <PostBuildEvent>
+      <Command>
+      </Command>
+    </PostBuildEvent>
+    <PreBuildEvent>
+      <Command>
+      </Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -146,6 +176,8 @@
       <LanguageStandard>stdcpp20</LanguageStandard>
       <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
       <OmitFramePointers>true</OmitFramePointers>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <DisableSpecificWarnings>26451; 26439; 4251; 4244;</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -153,16 +185,29 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
+    <PostBuildEvent>
+      <Command>
+      </Command>
+    </PostBuildEvent>
+    <PreBuildEvent>
+      <Command>
+      </Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="MainNetworkInstance.cpp" />
     <ClCompile Include="NetworkAlgorithm.cpp" />
     <ClCompile Include="NetworkData.cpp" />
     <ClCompile Include="NetworkDataParser.cpp" />
     <ClCompile Include="NetworkFramework.cpp" />
     <ClCompile Include="NetworkStructure.cpp" />
+    <ClCompile Include="PageProvider.cpp" />
+    <ClCompile Include="API.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Helper.h" />
+    <ClInclude Include="MainNetworkInstance.h" />
     <ClInclude Include="Output.h" />
     <ClInclude Include="Network.h" />
     <ClInclude Include="NetworkAlgorithm.h" />
@@ -170,6 +215,30 @@
     <ClInclude Include="NetworkDataParser.h" />
     <ClInclude Include="NetworkFramework.h" />
     <ClInclude Include="NetworkStructure.h" />
+    <ClInclude Include="PageProvider.h" />
+    <ClInclude Include="API.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="web\flex.css" />
+    <None Include="web\font.css" />
+    <None Include="web\index.html" />
+    <None Include="web\index_script.js" />
+    <None Include="web\index_style.css" />
+    <None Include="web\jquery.min.js" />
+    <None Include="web\manage_dataset.html" />
+    <None Include="web\manage_dataset.js" />
+    <None Include="web\material-colors.min.css" />
+    <None Include="web\material_appbar_script.js" />
+    <None Include="web\material_style.css" />
+    <None Include="web\mui.min.css" />
+    <None Include="web\mui.min.js" />
+    <None Include="web\query.js" />
+  </ItemGroup>
+  <ItemGroup>
+    <Font Include="web\HarmonySans.ttf" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="web\favicon.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

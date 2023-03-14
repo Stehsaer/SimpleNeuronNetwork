@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Manage Datasets</title>
+
+    <link href="mui.min.css" rel="stylesheet" type="text/css" />
+    <link href="material_style.css" rel="stylesheet" type="text/css" />
+    <link href="material-colors.min.css" rel="stylesheet" type="text/css" />
+    <link href="font.css" rel="stylesheet" type="text/css" />
+
+    <link href="favicon.png" rel="shorcut icon" />
+
+    <script src="mui.min.js"></script>
+    <script src="jquery.min.js"></script>
+    <script src="material_appbar_script.js"></script>
+
+    <style>
+        .inline-button {
+            display: inline;
+        }
+        .display-block
+        {
+            margin:10px;
+        }
+        #message-overlay
+        {
+            width:400px;
+            height:300px;
+
+            position:absolute;
+            margin: auto auto;
+            left:0; right:0; top:0; bottom:0;
+
+            opacity:0;
+        }
+    </style>
+</head>
+
+<body class="hide-sidedrawer">
+    <div id="sidedrawer" class="mui--no-user-select mui--z2">
+        <div id="sidedrawer-brand" class="mui--appbar-line-height">
+            <span class="mui--text-title">Pages</span>
+        </div>
+        <div class="mui-divider"></div>
+        <ul>
+            <li>
+                <strong>Home</strong>
+                <ul>
+                    <li><a href="/index.html">Home Page</a></li>
+                </ul>
+            </li>
+            <li>
+                <strong>Recognization</strong>
+                <ul>
+                    <li><a href="#">Hand Writing</a></li>
+                </ul>
+            </li>
+            <li>
+                <strong>Load & Train</strong>
+                <ul>
+                    <li><a href="#">Manage Datasets</a></li>
+                    <li><a href="#">Manage Model</a></li>
+                </ul>
+            </li>
+        </ul>
+    </div>
+    <header id="header">
+        <div class="mui-appbar mui--appbar-line-height mui--z1">
+            <div class="mui-container-fluid">
+                <a class="sidedrawer-toggle mui--visible-xs-inline-block mui--visible-sm-inline-block js-show-sidedrawer">☰</a>
+                <a class="sidedrawer-toggle mui--hidden-xs mui--hidden-sm js-hide-sidedrawer">☰</a>
+                <span class="mui--text-title mui--visible-xs-inline-block mui--visible-sm-inline-block"
+                      style="color: white; display: inline-block !important">Manage Datasets</span>
+            </div>
+        </div>
+        <style>
+        </style>
+    </header>
+    <div id="content-wrapper">
+        <div class="mui--appbar-height"></div>
+        <br />
+        <div class="mui-container-fluid" id="flex-wrapper">
+            <div class="mui-panel display-block">
+                <legend class="mui--text-headline">Datasets</legend>
+                <br />
+                <table class="mui-table mui-table--bordered" id="dataset-list-table">
+                    <thead>
+                        <tr>
+                            <th width="250px">Name</th>
+                            <th width="75px">File Size</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+                <form class="mui-form">
+                    <div class="mui-textfield">
+                        <input type="text" value="">
+                        <label>Name</label>
+                    </div>
+                    <div class="mui-select" id="slot-selection-div">
+                        <select id="slot-selection">
+                            <option>1</option>
+                            <option>2</option>
+                            <option>3</option>
+                            <option>4</option>
+                        </select>
+                        <label>Target Slot</label>
+                    </div>
+                </form>
+                <button class="mui-btn mui--z1" onclick="refresh()">Refresh</button>
+                <button class="mui-btn mui-btn--primary inline-button mui--z1">Load</button>
+            </div>
+            <div class="mui-panel mui--z1 display-block" id="data-status-block">
+                <legend class="mui--text-headline">Datasets</legend>
+                <br />
+                <table class="mui-table mui-table--bordered" id="dataset-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Size</th>
+                            <th>Count</th>
+                            <th>Est. Mem</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div id="message-overlay" class="mui-panel mui--z2">
+
+        </div>
+    </div>
+    <script src="query.js"></script>
+    <script src="manage_dataset.js"></script>
+</body>
+
+</html>

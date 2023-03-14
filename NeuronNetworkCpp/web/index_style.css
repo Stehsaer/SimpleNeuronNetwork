@@ -1,0 +1,20 @@
+.inline-div
+{
+    display:inline-block;
+}
+
+.display-block
+{
+    margin: 10px;
+    padding-top: 10px;
+}
+
+#server-status-block
+{
+    width:500px;
+}
+
+#data-status-block
+{
+    width: 600px;
+}
