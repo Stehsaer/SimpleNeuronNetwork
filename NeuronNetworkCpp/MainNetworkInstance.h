@@ -9,6 +9,7 @@ Function: Contains main network objects needed for main thread
 
 #include "Network.h"
 #include <string>
+#include <vector>
 
 #define MAX_DATASET_COUNT 4
 
@@ -16,7 +17,8 @@ enum class serverStatus
 {
 	Idle,
 	Query,
-	Working
+	Working,
+	Done
 };
 
 enum class serverTask
@@ -26,6 +28,19 @@ enum class serverTask
 	ReadDataset = 2,
 	TrainModel = 3,
 	RecognizeInput = 4
+};
+
+enum class ActivateFunctionType
+{
+	Sigmoid, SigmoidShifted, ReLU
+};
+
+struct TrainSnapshot
+{
+	int index;
+	double loss;
+
+	TrainSnapshot(int index, double loss): index(index),loss(loss){}
 };
 
 extern std::string status_text;
@@ -42,6 +57,9 @@ extern Network::NetworkDataSet datasets[MAX_DATASET_COUNT];
 const std::string datasetPath = "web_res/datasets/";
 const std::string webPagePath = "web/";
 
-void LoadDatasetWork(std::string image, std::string label, int slot);
+void LoadDatasetWork(std::string image, std::string label, int slot, std::string name);
+void ClearDataset(int slot);
+void CreateModelWork(int inNeuronCount, int outNeuronCount, int layerCount, int layerNeuronCount, ActivateFunctionType func);
+void TrainModelWork(int slot, int maxIter, double learningRate, double threshold);
 
 #endif

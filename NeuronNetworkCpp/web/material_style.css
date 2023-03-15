@@ -165,3 +165,8 @@ buttons {
     align-content: flex-start;
     align-items: flex-start;
 }
+
+a {
+    color: dodgerblue;
+    text-decoration: none;
+}

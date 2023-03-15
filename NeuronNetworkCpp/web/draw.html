@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Canvas</title>
+
+    <link href="mui.min.css" rel="stylesheet" type="text/css" />
+    <link href="material_style.css" rel="stylesheet" type="text/css" />
+    <link href="material-colors.min.css" rel="stylesheet" type="text/css" />
+    <link href="font.css" rel="stylesheet" type="text/css" />
+
+    <link href="favicon.png" rel="shorcut icon" />
+
+    <script src="mui.min.js"></script>
+    <script src="jquery.min.js"></script>
+    <script src="material_appbar_script.js"></script>
+
+    <script src="echarts.min.js"></script>
+
+    <style>
+        .display-block {
+            margin: 10px;
+        }
+    </style>
+
+</head>
+<body class="hide-sidedrawer">
+    <div id="sidedrawer" class="mui--no-user-select mui--z2">
+        <div id="sidedrawer-brand" class="mui--appbar-line-height">
+            <span class="mui--text-title">Pages</span>
+        </div>
+        <div class="mui-divider"></div>
+        <ul>
+            <li>
+                <strong>Home</strong>
+                <ul>
+                    <li>
+                        <a href="/index.html">Home Page</a>
+                    </li>
+                </ul>
+            </li>
+            <li>
+                <strong>Recognization</strong>
+                <ul>
+                    <li>
+                        <a href="#">Hand Writing</a>
+                    </li>
+                </ul>
+            </li>
+            <li>
+                <strong>Load & Train</strong>
+                <ul>
+                    <li>
+                        <a href="/manage_dataset.html">Manage Datasets</a>
+                    </li>
+                    <li>
+                        <a href="/manage_model.html">Manage Model</a>
+                    </li>
+                </ul>
+            </li>
+        </ul>
+    </div>
+    <header id="header">
+        <div class="mui-appbar mui--appbar-line-height mui--z1">
+            <div class="mui-container-fluid">
+                <a class="sidedrawer-toggle mui--visible-xs-inline-block mui--visible-sm-inline-block js-show-sidedrawer">☰</a>
+                <a class="sidedrawer-toggle mui--hidden-xs mui--hidden-sm js-hide-sidedrawer">☰</a>
+                <span class="mui--text-title mui--visible-xs-inline-block mui--visible-sm-inline-block"
+                      style="color: white; display: inline-block !important">Canvas</span>
+            </div>
+        </div>
+    </header>
+    <div id="content-wrapper">
+        <div class="mui--appbar-height"></div>
+        <br />
+        <div class="mui-container-fluid" id="flex-wrapper">
+            <!-- main flex container -->
+            <div class="mui-panel display-block" id="canvas-block">
+                <legend class="mui--text-headline">Canvas</legend>
+                <label class="mui--text-body1">For MNIST datasets only</label>
+                <br />
+
+                <canvas id="canvas" class="mui--z2" width="28" height="28" style="width:300px; height:300px; cursor:crosshair; display:block; margin:20px; border-radius:4px">浏览器不支持canvas<!-- 如果不支持会显示这段文字 --></canvas><br />
+                <button class="mui-btn" onclick="clearCanvas()" style="display:inline">Clear</button>
+                <button class="mui-btn mui-btn--primary" onclick="recognize()" style="display:inline">Recognize</button>
+            </div>
+            <div class="mui-panel display-block" id="train-detail-block" hidden>
+                <div id="result-chart" style="width:500px; height:300px"></div>
+            </div>
+        </div>
+    </div>
+    <script src="query.js"></script>
+    <script src="popup.js"></script>
+    <script src="draw.js"></script>
+    <script>
+		initCanvas(300);
+
+		function recognize() {
+			var imageData = ctx.getImageData(0,0,28,28).data;
+
+			var pixels = [];
+			for (var pix = 0; pix < 784; pix++) {
+				pixels[pix] = imageData[pix * 4];
+			}
+
+            var outContent = JSON.stringify(pixels);
+            //console.log(outContent);
+
+            var request = new XMLHttpRequest();
+
+            request.onreadystatechange = function () {
+                if (request.readyState == 4) {
+                    if (request.status == 200) {
+                        updateResult(request.responseText);
+                    }
+                    if (request.status == 400) {
+                        showPopup("Error", `Bad Request! <br/>Message: ${request.responseText}`);
+                    }
+                    if (request.status == 500) {
+                        showPopup("Error", `An unhandled error occured. <br/>Message: ${request.responseText}`);
+                    }
+                }
+            }
+
+            request.open("POST", "api/query/recognize");
+            request.send(outContent);
+        }
+
+        function updateResult(result) {
+            var result_json = JSON.parse(result);
+            $("#train-detail-block").show();
+
+            var myChart = echarts.init(document.getElementById('result-chart'));
+
+            var option = {
+                textStyle: {
+                    fontFamily: 'Harmony',
+                },
+                title: {
+                    text: 'Result'
+                },
+                tooltip: {formatter: '{c}%'},
+                legend: {
+                    data: ['Possibility']
+                },
+                xAxis: {
+                    
+                },
+                yAxis: {min:0, max:100},
+                series: [{
+                    name: 'Possibility',
+                    type: 'bar',
+                    data: []
+                }]
+            };
+
+            var index = 0;
+            
+
+            option.series[0].data = new Array();
+
+            option.xAxis.data = new Array();
+
+            result_json.forEach(element => {
+                option.xAxis.data[index] = index;
+                option.series[0].data[index] = (result_json[index] * 100).toFixed(2);
+                index++;
+            });
+
+            myChart.setOption(option);
+        }
+
+    </script>
+</body>
+</html>

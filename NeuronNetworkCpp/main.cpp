@@ -23,7 +23,7 @@
 using namespace std::filesystem;
 
 // web service
-int port = 17788;
+int port = 80;
 const std::string webPath = R"(D:\Users\HFAI\Documents\neu\SimpleNeuronNetwork\NeuronNetworkCpp\web)";
 
 using namespace drogon;
@@ -32,8 +32,8 @@ int main()
 {
 	InitPageProvider();
 
-	app().addListener("localhost", 10086);
-	app().setLogLevel(trantor::Logger::LogLevel::kDebug);
+	app().addListener("localhost", port);
+	app().setLogLevel(trantor::Logger::LogLevel::kTrace);
 	app().run();
 
 	return 0;

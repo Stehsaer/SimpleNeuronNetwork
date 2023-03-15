@@ -139,6 +139,22 @@
     <None Include="web\query.js">
       <Filter>Web</Filter>
     </None>
+    <None Include="web\popup.js">
+      <Filter>Web</Filter>
+    </None>
+    <None Include="web\manage_model.html">
+      <Filter>Web</Filter>
+    </None>
+    <None Include="cpp.hint" />
+    <None Include="web\manage_model.js">
+      <Filter>Web</Filter>
+    </None>
+    <None Include="web\draw.js">
+      <Filter>Web</Filter>
+    </None>
+    <None Include="web\draw.html">
+      <Filter>Web</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Font Include="web\HarmonySans.ttf">

@@ -7,6 +7,18 @@
 using namespace std::filesystem;
 using namespace Network;
 
+bool isLittleEndian()
+{
+	union U
+	{
+		int  i;
+		char c;
+	};
+	U u;
+	u.i = 1;
+	return u.c == 1;
+}
+
 void Reverse(int* x) // convert MSB & LSB
 {
 	int y = 0;
@@ -17,7 +29,7 @@ void Reverse(int* x) // convert MSB & LSB
 	*x = y;
 }
 
-int GetInt32(unsigned char* data, int offset)
+int GetInt32NoReverse(unsigned char* data, int offset)
 {
 	int out;
 	memcpy(&out, data + offset, sizeof(int));
@@ -27,6 +39,7 @@ int GetInt32(unsigned char* data, int offset)
 void WriteInt32(int src, unsigned char* dst, int offset)
 {
 	int _src = src;
+	if (isLittleEndian()) Reverse(&_src);
 	memcpy(dst + offset, &src, sizeof(int));
 }
 
@@ -38,12 +51,19 @@ int GetInt32Reverse(unsigned char* data, int offset)
 	return out;
 }
 
-bool NetworkDataParser::ReadMNISTData(NetworkDataSet* dataSet, std::string dataPath, std::string labelPath, Network::Algorithm::NormalizationMode mode, bool verbose)
+int GetInt32(unsigned char* data, int offset)
+{
+	if (isLittleEndian())
+		return GetInt32Reverse(data, offset);
+	else
+		return GetInt32NoReverse(data, offset);
+}
+
+ProcessState NetworkDataParser::ReadMNISTData(NetworkDataSet* dataSet, std::string dataPath, std::string labelPath, Network::Algorithm::NormalizationMode mode)
 {
 	// check if file is valid
 	if (!is_regular_file(dataPath) || !is_regular_file(labelPath) || !exists(dataPath) || !exists(labelPath))
 	{
-		PrintError(MSG_NO_SUCH_FILE, verbose);
 		return false;
 	}
 
@@ -63,18 +83,29 @@ bool NetworkDataParser::ReadMNISTData(NetworkDataSet* dataSet, std::string dataP
 	// check if files get opened correctly
 	if (!dataFileObj || !labelFileObj)
 	{
-		PrintError(MSG_CANT_OPEN_FILE, verbose);
-		return false;
+		return ProcessState(false, "Can't Open File");
 	}
 
 	// read data
 	unsigned char* data, * label;
 
-	int dataFileSize = file_size(path(dataPath));
-	int labelFileSize = file_size(path(labelPath));
+	uintmax_t dataFileSize = file_size(path(dataPath));
+	uintmax_t labelFileSize = file_size(path(labelPath));
+
+	// check file size, current limited at 4G;
+	if (dataFileSize > UINT32_MAX || labelFileSize > UINT32_MAX)
+	{
+		return ProcessState(false, "File Too Large");
+	}
 
 	data = new unsigned char[dataFileSize];
 	label = new unsigned char[labelFileSize];
+
+	// not enough memory space
+	if (!label || !data)
+	{
+		return ProcessState(false, "Running Out Of Memory Space");
+	}
 
 	fread(data, sizeof(unsigned char), dataFileSize, dataFileObj);
 	fread(label, sizeof(unsigned char), labelFileSize, labelFileObj);
@@ -82,34 +113,30 @@ bool NetworkDataParser::ReadMNISTData(NetworkDataSet* dataSet, std::string dataP
 	fclose(dataFileObj); // close file streams correctly
 	fclose(labelFileObj);
 
-	int dataMagicNumber = GetInt32Reverse(data, 0);
-	int labelMagicNumber = GetInt32Reverse(label, 0);
+	int dataMagicNumber = GetInt32(data, 0);
+	int labelMagicNumber = GetInt32(label, 0);
 
 	// check magic number
 	if (dataMagicNumber != DataMagicNumber || labelMagicNumber != LabelMagicNumber)
-	{
-		PrintError(MSG_READ_ERR, verbose);
-		
+	{		
 		delete[] data;
 		delete[] label;
-		return false;
+		return ProcessState(false, "Can't Parse File");
 	}
 
-	int dataCount = GetInt32Reverse(data, DataCountOffset);
-	int labelCount = GetInt32Reverse(label, LabelCountOffset);
+	int dataCount = GetInt32(data, DataCountOffset);
+	int labelCount = GetInt32(label, LabelCountOffset);
 
 	// check if counts match
 	if (dataCount != labelCount)
 	{
-		PrintError(MSG_READ_ERR, verbose);
-
 		delete[] data;
 		delete[] label;
-		return false;
+		return ProcessState(false, "Can't Parse File");
 	}
 
-	int dataWidth = GetInt32Reverse(data, DataWidthOffset);
-	int dataHeight = GetInt32Reverse(data, DataHeightOffset);
+	int dataWidth = GetInt32(data, DataWidthOffset);
+	int dataHeight = GetInt32(data, DataHeightOffset);
 
 	// push data
 	for (int i = 0; i < dataCount; i++)
@@ -132,7 +159,7 @@ bool NetworkDataParser::ReadMNISTData(NetworkDataSet* dataSet, std::string dataP
 	delete[] label;
 	delete[] data;
 
-	return true;
+	return ProcessState(true);
 }
 
 /*
@@ -240,7 +267,7 @@ void WriteData_Layer(NeuronLayer* layer, unsigned char** data)
 	*data = ptrNeuron;
 }
 
-bool NetworkDataParser::SaveNetworkData(Network::Framework::BackPropaNetwork* network, std::string path, bool verbose)
+ProcessState NetworkDataParser::SaveNetworkData(Network::Framework::BackPropaNetwork* network, std::string path)
 {
 	// Calculate required space
 	int lengthRequired = 0;
@@ -256,6 +283,11 @@ bool NetworkDataParser::SaveNetworkData(Network::Framework::BackPropaNetwork* ne
 	lengthRequired += sizeof(int); // End data
 
 	unsigned char* data = new unsigned char[lengthRequired]; // Allocate space
+
+	if (!data)
+	{
+		return ProcessState(false, "Running Out Of Memory Space");
+	}
 
 	// Write Metadata
 	WriteInt32(MetadataMN, data, 0x00);
@@ -293,12 +325,6 @@ bool NetworkDataParser::SaveNetworkData(Network::Framework::BackPropaNetwork* ne
 
 	WriteInt32(EndDataMN, ptr, 0x00);
 
-	// DEBUG
-	//printf("len: %d", (int)(ptr + 0x04 - data));
-	//system("pause");
-
-	// Write data to file
-
 	FILE* file;
 
 #ifdef _FILE_OP_SAFE_
@@ -309,9 +335,8 @@ bool NetworkDataParser::SaveNetworkData(Network::Framework::BackPropaNetwork* ne
 
 	if (!file)
 	{
-		PrintError(MSG_CANT_OPEN_FILE, verbose);
 		delete[] data;
-		return false;
+		return ProcessState(false, "Can't Write File");
 	}
 
 	fwrite(data, 1, lengthRequired, file);
@@ -320,7 +345,7 @@ bool NetworkDataParser::SaveNetworkData(Network::Framework::BackPropaNetwork* ne
 	// free
 	delete[] data;
 
-	return true;
+	return ProcessState(true);
 }
 
 bool ReadNetwork_Neuron(unsigned char** data, Neuron* neuron)
@@ -379,12 +404,11 @@ bool ReadNetwork_Layer(unsigned char** data, NeuronLayer* layer)
 	return true;
 }
 
-bool NetworkDataParser::ReadNetworkData(Network::Framework::BackPropaNetwork** network, std::string _path, bool verbose)
+ProcessState NetworkDataParser::ReadNetworkData(Network::Framework::BackPropaNetwork** network, std::string _path)
 {
 	if (!exists(std::filesystem::path(_path)))
 	{
-		PrintError(MSG_NO_SUCH_FILE, verbose);
-		return false;
+		return ProcessState(false, "No Such File");
 	}
 
 	// fetch file size
@@ -401,11 +425,8 @@ bool NetworkDataParser::ReadNetworkData(Network::Framework::BackPropaNetwork** n
 
 	if (!file)
 	{
-		PrintError(MSG_CANT_OPEN_FILE, verbose);
-		return false;
+		return ProcessState(false, "No Such File");
 	}
-
-	if(verbose) printf("Reading %d bytes from file...\n", filesize);
 
 	unsigned char* data = new unsigned char[filesize];
 
@@ -414,11 +435,9 @@ bool NetworkDataParser::ReadNetworkData(Network::Framework::BackPropaNetwork** n
 	
 	if (GetInt32(data, 0x00) != MetadataMN)
 	{
-		PrintError(MSG_READ_ERR, verbose);
-
 		delete[] data;
 
-		return false;
+		return ProcessState(false, "Network Reading Error");
 	}
 
 	int inNeuronCount = GetInt32(data, 0x04);
@@ -454,45 +473,40 @@ bool NetworkDataParser::ReadNetworkData(Network::Framework::BackPropaNetwork** n
 
 	Network::Framework::BackPropaNetwork * nwk = new Network::Framework::BackPropaNetwork(inNeuronCount, outNeuronCount, hiddenNeuronCount, hiddenLayerCount, ForwardActive, BackwardActive, DBL_MAX);
 
-	if (verbose) printf("Parsing data...\n");
-
 	unsigned char* ptr = data + 0x18;
 
 	if (!ReadNetwork_Layer(&ptr, &(nwk->outLayer)))
 	{
-		PrintError(MSG_READ_ERR, verbose);
-		(* network)->Destroy();
+		nwk->Destroy();
 
-		delete network;
+		delete nwk;
 		delete[] data;
 
-		return false;
+		return ProcessState(false, "Network Reading Error");
 	}
 
 	for (auto& layer : nwk->hiddenLayerList)
 	{
 		if (!ReadNetwork_Layer(&ptr, &layer))
 		{
-			PrintError(MSG_READ_ERR, verbose);
 			nwk->Destroy();
 
 			delete nwk;
 			delete[] data;
 
-			return false;
+			return ProcessState(false, "Network Reading Error");
 		}
 	}
 
 	// check end data
 	if (GetInt32(ptr, 0x00) != EndDataMN)
 	{
-		PrintError(MSG_READ_ERR, verbose);
 		nwk->Destroy();
 
-		delete network;
+		delete nwk;
 		delete[] data;
 
-		return false;
+		return ProcessState(false, "Network Reading Error");
 	}
 
 	// free space
@@ -500,5 +514,5 @@ bool NetworkDataParser::ReadNetworkData(Network::Framework::BackPropaNetwork** n
 
 	*network = nwk;
 
-	return true;
+	return ProcessState(true);
 }

@@ -16,10 +16,26 @@ function interval_update(doCycle, func) {
 
             func(temp);
 
-            if (doCycle == true) setTimeout(function () { interval_update(true, func) }, 1000);
+            if (doCycle == true) setTimeout(function () { interval_update(true, func) }, 500);
         }
     }
 
     request.open("GET", "/api/query/status");
     request.send(null);
+}
+
+function get_success(status) {
+    if (status["status"] == 3) {
+        // clear success flag
+        var request = new XMLHttpRequest();
+        request.open("POST", "/api/command/clear_status");
+        request.send(null);
+
+        if (status["success"] == 1) {
+            showPopup("Success", `Done with success! <br/><strong>Message:</strong> ${status["status_text"]}`);
+        }
+        else {
+            showPopup("Fail", `An error occured. <br/><strong>Message:</strong> ${status["status_text"]}`);
+        }
+    }
 }

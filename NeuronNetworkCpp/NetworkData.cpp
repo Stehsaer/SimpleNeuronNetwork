@@ -76,7 +76,10 @@ void NetworkDataSet::Destroy()
 	for (auto data : dataSet)
 	{
 		free(data->data);
+		delete data;
 	}
+
+	dataSet.clear();
 }
 
 NetworkData& NetworkDataSet::operator[](int index)

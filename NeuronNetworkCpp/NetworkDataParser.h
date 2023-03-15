@@ -9,12 +9,14 @@
 
 namespace Network
 {
-	/*
-	CHANGELOG:
+	struct ProcessState // A struct to indicate success or not
+	{
+		std::string msg;
+		bool success;
 
-		2023-2-20:
-			MODIFY ReadMnistData(...) Logic; cut down memory space needed
-	*/
+		ProcessState(bool success, std::string msg = "") : msg(msg), success(success) {}
+	};
+
 	class NetworkDataParser
 	{
 	public:
@@ -29,9 +31,9 @@ namespace Network
 		static const int DataMagicNumber = 2051;
 		static const int LabelMagicNumber = 2049;
 
-		static bool ReadMNISTData(NetworkDataSet* dataSet, std::string dataPath, std::string labelPath, Network::Algorithm::NormalizationMode mode, bool verbose = false);
-		static bool SaveNetworkData(Network::Framework::BackPropaNetwork* network, std::string path, bool verbose = false);
-		static bool ReadNetworkData(Network::Framework::BackPropaNetwork** network, std::string path, bool verbose = false);
+		static ProcessState ReadMNISTData(NetworkDataSet* dataSet, std::string dataPath, std::string labelPath, Network::Algorithm::NormalizationMode mode);
+		static ProcessState SaveNetworkData(Network::Framework::BackPropaNetwork* network, std::string path);
+		static ProcessState ReadNetworkData(Network::Framework::BackPropaNetwork** network, std::string path);
 	};
 }
 

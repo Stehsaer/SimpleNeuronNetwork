@@ -219,7 +219,11 @@
     <ClInclude Include="API.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="cpp.hint" />
+    <None Include="web\draw.html" />
+    <None Include="web\draw.js" />
     <None Include="web\flex.css" />
+    <None Include="web\manage_model.html" />
     <None Include="web\font.css" />
     <None Include="web\index.html" />
     <None Include="web\index_script.js" />
@@ -227,11 +231,13 @@
     <None Include="web\jquery.min.js" />
     <None Include="web\manage_dataset.html" />
     <None Include="web\manage_dataset.js" />
+    <None Include="web\manage_model.js" />
     <None Include="web\material-colors.min.css" />
     <None Include="web\material_appbar_script.js" />
     <None Include="web\material_style.css" />
     <None Include="web\mui.min.css" />
     <None Include="web\mui.min.js" />
+    <None Include="web\popup.js" />
     <None Include="web\query.js" />
   </ItemGroup>
   <ItemGroup>

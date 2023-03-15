@@ -23,20 +23,9 @@
         .inline-button {
             display: inline;
         }
-        .display-block
-        {
-            margin:10px;
-        }
-        #message-overlay
-        {
-            width:400px;
-            height:300px;
 
-            position:absolute;
-            margin: auto auto;
-            left:0; right:0; top:0; bottom:0;
-
-            opacity:0;
+        .display-block {
+            margin: 10px;
         }
     </style>
 </head>
@@ -51,20 +40,28 @@
             <li>
                 <strong>Home</strong>
                 <ul>
-                    <li><a href="/index.html">Home Page</a></li>
+                    <li>
+                        <a href="/index.html">Home Page</a>
+                    </li>
                 </ul>
             </li>
             <li>
                 <strong>Recognization</strong>
                 <ul>
-                    <li><a href="#">Hand Writing</a></li>
+                    <li>
+                        <a href="/draw.html">Hand Writing</a>
+                    </li>
                 </ul>
             </li>
             <li>
                 <strong>Load & Train</strong>
                 <ul>
-                    <li><a href="#">Manage Datasets</a></li>
-                    <li><a href="#">Manage Model</a></li>
+                    <li>
+                        <a href="#">Manage Datasets</a>
+                    </li>
+                    <li>
+                        <a href="/manage_model.html">Manage Model</a>
+                    </li>
                 </ul>
             </li>
         </ul>
@@ -98,26 +95,24 @@
                     <tbody>
                     </tbody>
                 </table>
-                <form class="mui-form">
-                    <div class="mui-textfield">
-                        <input type="text" value="">
-                        <label>Name</label>
-                    </div>
-                    <div class="mui-select" id="slot-selection-div">
-                        <select id="slot-selection">
-                            <option>1</option>
-                            <option>2</option>
-                            <option>3</option>
-                            <option>4</option>
-                        </select>
-                        <label>Target Slot</label>
-                    </div>
-                </form>
+                <div class="mui-textfield" width="auto">
+                    <input type="text" value="" id="name-input" required>
+                    <label>Name</label>
+                </div>
+                <div class="mui-select" id="slot-selection-div" width="auto">
+                    <select id="slot-selection">
+                        <option>1</option>
+                        <option>2</option>
+                        <option>3</option>
+                        <option>4</option>
+                    </select>
+                    <label>Target Slot</label>
+                </div>
                 <button class="mui-btn mui--z1" onclick="refresh()">Refresh</button>
-                <button class="mui-btn mui-btn--primary inline-button mui--z1">Load</button>
+                <button class="mui-btn mui-btn--primary inline-button mui--z1" onclick="LoadDataset()" title="Load data into slot">Load</button>
             </div>
             <div class="mui-panel mui--z1 display-block" id="data-status-block">
-                <legend class="mui--text-headline">Datasets</legend>
+                <legend class="mui--text-headline">Datasets Loaded</legend>
                 <br />
                 <table class="mui-table mui-table--bordered" id="dataset-table">
                     <thead>
@@ -133,12 +128,10 @@
                 </table>
             </div>
         </div>
-        <div id="message-overlay" class="mui-panel mui--z2">
-
-        </div>
+        
     </div>
     <script src="query.js"></script>
+    <script src="popup.js"></script>
     <script src="manage_dataset.js"></script>
 </body>
-
 </html>

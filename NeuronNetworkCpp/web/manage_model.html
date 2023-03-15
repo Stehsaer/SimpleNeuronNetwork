@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8" />
+	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+	<title>Manage Models</title>
+
+	<link href="mui.min.css" rel="stylesheet" type="text/css" />
+	<link href="material_style.css" rel="stylesheet" type="text/css" />
+	<link href="material-colors.min.css" rel="stylesheet" type="text/css" />
+	<link href="font.css" rel="stylesheet" type="text/css" />
+
+	<link href="favicon.png" rel="shorcut icon" />
+
+	<script src="mui.min.js"></script>
+	<script src="jquery.min.js"></script>
+	<script src="material_appbar_script.js"></script>
+
+	<style>
+		.display-block {
+			margin: 10px;
+		}
+	</style>
+
+</head>
+
+<body class="hide-sidedrawer">
+	<div id="sidedrawer" class="mui--no-user-select mui--z2">
+		<div id="sidedrawer-brand" class="mui--appbar-line-height">
+			<span class="mui--text-title">Pages</span>
+		</div>
+		<div class="mui-divider"></div>
+		<ul>
+			<li>
+				<strong>Home</strong>
+				<ul>
+					<li>
+						<a href="/index.html">Home Page</a>
+					</li>
+				</ul>
+			</li>
+			<li>
+				<strong>Recognization</strong>
+				<ul>
+					<li>
+						<a href="/draw.html">Hand Writing</a>
+					</li>
+				</ul>
+			</li>
+			<li>
+				<strong>Load & Train</strong>
+				<ul>
+					<li>
+						<a href="/manage_dataset.html">Manage Datasets</a>
+					</li>
+					<li>
+						<a href="#">Manage Model</a>
+					</li>
+				</ul>
+			</li>
+		</ul>
+	</div>
+	<header id="header">
+		<div class="mui-appbar mui--appbar-line-height mui--z1">
+			<div class="mui-container-fluid">
+				<a class="sidedrawer-toggle mui--visible-xs-inline-block mui--visible-sm-inline-block js-show-sidedrawer">☰</a>
+				<a class="sidedrawer-toggle mui--hidden-xs mui--hidden-sm js-hide-sidedrawer">☰</a>
+				<span class="mui--text-title mui--visible-xs-inline-block mui--visible-sm-inline-block"
+					  style="color: white; display: inline-block !important">Manage Models</span>
+			</div>
+		</div>
+		<style>
+		</style>
+	</header>
+	<div id="content-wrapper">
+		<div class="mui--appbar-height"></div>
+		<br />
+		<div class="mui-container-fluid" id="flex-wrapper">
+			<!-- main flex container -->
+			<div class="mui-panel display-block">
+				<legend class="mui--text-headline">Model Status</legend>
+				<br />
+
+				<div style="width: 300px">
+					<div>
+						<strong>Model Status: </strong>
+						<span id="model-status"></span>
+					</div>
+
+					<div style="overflow:visible; word-break:break-all">
+						<strong>Parameters: </strong>
+						<span id="model-parameter"></span>
+					</div>
+				</div>
+			</div>
+			<div class="mui-panel display-block" style="width:300px">
+				<legend class="mui--text-headline">Create Model</legend>
+				<br />
+
+				<div class="mui-textfield" width="auto">
+					<input type="number" value="784" id="in-input" min="1" required>
+					<label>In Layer Neuron Count</label>
+				</div>
+				<div class="mui-textfield" width="auto">
+					<input type="number" value="10" id="out-input" min="1" required>
+					<label>Out Layer Neuron Count</label>
+				</div>
+				<div class="mui-textfield" width="auto">
+					<input type="number" value="1" id="layer-input" min="1" required>
+					<label>Layer Count</label>
+				</div>
+				<div class="mui-textfield" width="auto">
+					<input type="number" value="64" id="count-input" min="1" required>
+					<label>Layer Neuron Count</label>
+				</div>
+				<div class="mui-select" width="auto">
+					<select id="func-input">
+						<option value="0">Sigmoid</option>
+						<option value="1">Shifted Sigmoid</option>
+						<option value="2">ReLU</option>
+					</select>
+					<label>Activate Function</label>
+				</div>
+				<button class="mui-btn mui-btn--primary" onclick="create_model()">Create</button>
+			</div>
+			<div class="mui-panel display-block" style="width:300px">
+				<legend class="mui--text-headline">Train Model</legend>
+				<br />
+
+				<div class="mui-select" width="auto">
+					<select id="slot-input">
+						<option value="0">Dataset (Slot 0)</option>
+					</select>
+					<label>Dataset</label>
+				</div>
+				<div class="mui-textfield" width="auto">
+					<input type="number" value="0.05" id="learning-rate-input" min="0" max="1" step="0.000001" required>
+					<label>Learning Rate</label>
+				</div>
+				<div class="mui-textfield" width="auto">
+					<input type="number" value="0.05" id="threshold-input" min="0" max="1" step="0.0001" required>
+					<label>Threshold</label>
+				</div>
+				<div class="mui-textfield" width="auto">
+					<input type="number" value="3" id="maxiter-input" min="0" required>
+					<label>Max Iteration Count</label>
+				</div>
+
+				<button class="mui-btn mui-btn--primary" onclick="start_training()">Train</button>
+			</div>
+			<div class="mui-panel display-block" id="train-detail-block" style="width:300px" hidden>
+				<legend class="mui--text-headline">Train Details</legend>
+				<br />
+
+				<span id="progress-text" class="mui--text-body1">50%</span><progress value="0.5" id="progress-indicator" style="margin-left:10px; display:inline; width:200px"></progress><br/>
+				<span id="progress-detail"></span>
+			</div>
+		</div>
+	</div>
+	<script src="query.js"></script>
+	<script src="popup.js"></script>
+	<script src="manage_model.js"></script>
+</body>
+</html>

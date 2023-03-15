@@ -7,14 +7,16 @@
 
 namespace Network
 {
+	typedef double (*ActivateFunction)(double);
+
 	namespace Framework
 	{
 		class BackPropaNetwork
 		{
 		public:
 			// active functions
-			double (*ForwardActive)(double);
-			double (*BackwardActive)(double);
+			ActivateFunction ForwardActive;
+			ActivateFunction BackwardActive;
 
 			// neuron counts
 			int inNeuronCount, outNeuronCount, hiddenNeuronCount, hiddenLayerCount;
@@ -27,7 +29,8 @@ namespace Network
 			double learningRate, loss;
 			double * targetData; 
 			
-			BackPropaNetwork(int inNeuronCount, int outNeuronCount, int hiddenNeuronCount, int hiddenLayerCount, double (*ForwardFunc)(double), double (*BackwardFunc)(double), double learningRate);
+			// construction func
+			BackPropaNetwork(int inNeuronCount, int outNeuronCount, int hiddenNeuronCount, int hiddenLayerCount, ActivateFunction ForwardFunc, ActivateFunction BackwardFunc, double learningRate);
 			
 			double GetLoss();
 			void RandomizeAllWeights(double min, double max);
@@ -40,6 +43,7 @@ namespace Network
 
 			void Train(NetworkData& data, int maxIterCount = 3, double threshold = 0.01);
 
+			// result
 			int FindLargestOutput();
 
 			int GetResultNetworkData(NetworkData& data);

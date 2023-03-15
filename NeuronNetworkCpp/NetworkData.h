@@ -35,10 +35,11 @@ namespace Network
 	public:
 		std::vector<NetworkData*> dataSet;
 		int dataWidth, dataHeight;
+		std::string name;
 
 		Network::Algorithm::NormalizationMode mode;
 
-		NetworkDataSet(): dataWidth(0), dataHeight(0) {}
+		NetworkDataSet(std::string name = "") : dataWidth(0), dataHeight(0), name(name) {}
 		int Count();
 		void AddData(NetworkData* data);
 		NetworkData& operator[](int index);

@@ -9,9 +9,9 @@
 using namespace Network::Framework;
 using namespace Network::Algorithm;
 
-BackPropaNetwork::BackPropaNetwork(int inNeuronCount, int outNeuronCount, int hiddenNeuronCount, int hiddenLayerCount, double (*ForwardFunc)(double), double (*BackwardFunc)(double), double learningRate)
+BackPropaNetwork::BackPropaNetwork(int inNeuronCount, int outNeuronCount, int hiddenNeuronCount, int hiddenLayerCount, ActivateFunction ForwardFunc, ActivateFunction BackwardFunc, double learningRate)
 {
-	if (inNeuronCount <= 0 || outNeuronCount <= 0 || hiddenNeuronCount <= 0 || hiddenLayerCount <= 0 || learningRate <= 0.0)
+	if (inNeuronCount <= 0 || outNeuronCount <= 0 || hiddenNeuronCount <= 0 || hiddenLayerCount <= 0 || learningRate < 0.0)
 	{
 		throw "Invalid input.";
 	}
