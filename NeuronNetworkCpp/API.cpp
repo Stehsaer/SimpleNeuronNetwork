@@ -58,9 +58,9 @@ Json::Value GetStatusJson()
 	return statusValue;
 }
 
-Json::Value GetDatasetListJson()
+Json::Value GetFileList(std::string path)
 {
-	fs::path dir(datasetPath);
+	fs::path dir(path);
 	Json::Value val;
 
 	for (auto& iter : fs::directory_iterator(dir))
@@ -88,7 +88,15 @@ void Query::GetStatus(const HttpRequestPtr& req, std::function<void(const HttpRe
 
 void Query::GetDatasetList(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& callback)
 {
-	Json::Value returnValue = GetDatasetListJson();
+	Json::Value returnValue = GetFileList(datasetPath);
+
+	auto response = HttpResponse::newHttpJsonResponse(returnValue);
+	callback(response);
+}
+
+void Query::GetModelList(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& callback)
+{
+	Json::Value returnValue = GetFileList(modelPath);
 
 	auto response = HttpResponse::newHttpJsonResponse(returnValue);
 	callback(response);
@@ -289,6 +297,62 @@ void Query::Recognize(const HttpRequestPtr& req, std::function<void(const HttpRe
 
 		response->setStatusCode(k500InternalServerError);
 		response->setBody(std::format("Unhandled Error: {}", e.what()));
+		callback(response);
+	}
+}
+
+void Command::SaveModel(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& callback, std::string name)
+{
+	auto response = HttpResponse::newHttpResponse();
+
+	if (server_status != serverStatus::Idle)
+	{
+		response->setStatusCode(k403Forbidden);
+		callback(response);
+
+		return;
+	}
+	else
+	{
+		server_status = serverStatus::Query;
+		server_task = serverTask::TrainModel;
+		serverProgress = 0.0f;
+		serverProgressDisplay = "";
+
+		std::cout << std::format("Save Model: name={}", name) << std::endl;
+
+		std::thread thr(SaveModelWork, name);
+		thr.detach();
+
+		response->setStatusCode(k200OK);
+		callback(response);
+	}
+}
+
+void Command::LoadModel(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& callback, std::string name)
+{
+	auto response = HttpResponse::newHttpResponse();
+
+	if (server_status != serverStatus::Idle)
+	{
+		response->setStatusCode(k403Forbidden);
+		callback(response);
+
+		return;
+	}
+	else
+	{
+		server_status = serverStatus::Query;
+		server_task = serverTask::TrainModel;
+		serverProgress = 0.0f;
+		serverProgressDisplay = "";
+
+		std::cout << std::format("Load Model: name={}", name) << std::endl;
+
+		std::thread thr(LoadModelWork, name);
+		thr.detach();
+
+		response->setStatusCode(k200OK);
 		callback(response);
 	}
 }

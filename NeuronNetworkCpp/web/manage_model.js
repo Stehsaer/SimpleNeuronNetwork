@@ -9,10 +9,12 @@ function refresh_model_status(status_json) {
 	if (status_json["network_info"] == null) {
 		model_status_text.text("Empty");
 		model_parameter_text.text("Empty");
+		//$("#train-model-block").attr("disabled", true);
 	}
 	else {
 		model_status_text.text("Loaded");
 		model_parameter_text.text(`${JSON.stringify(status_json["network_info"])}`);
+		//$("#train-model-block").attr("disabled", false);
 	}
 
 	if (JSON.stringify(status_json["datasets_info"]) != JSON.stringify(prev_slot)) {
@@ -39,7 +41,7 @@ function refresh_model_status(status_json) {
 		$("#train-detail-block").hide();
     }
 
-	get_success(status_json);
+	get_success_callback(status_json, function () { loadModelList(); });
 }
 
 interval_update(true, refresh_model_status);

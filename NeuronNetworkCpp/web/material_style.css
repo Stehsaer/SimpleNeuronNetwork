@@ -170,3 +170,7 @@ a {
     color: dodgerblue;
     text-decoration: none;
 }
+
+table{
+    white-space:nowrap;
+}

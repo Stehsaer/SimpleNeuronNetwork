@@ -8,22 +8,23 @@ var penColor = "white";
 var penWidth = 2;
 var scaleRatio;
 
-function clearCanvas() {
+function clearCanvas(size) {
     ctx.fillStyle = "#000000";
-    ctx.fillRect(0, 0, 28, 28);
+    ctx.fillRect(0, 0, size, size);
 }
 
-function initCanvas(actualSize) {
+function initCanvas(resolution, actualSize) {
     canvas = document.getElementById('canvas');
     ctx = canvas.getContext("2d");
 
-    clearCanvas();
+    clearCanvas(resolution);
 
     canvas.addEventListener("mousemove", drawing, true);
     canvas.addEventListener("mousedown", penDown, false);
     canvas.addEventListener("mouseup", penUp, false);
 
-    scaleRatio = 28 / actualSize;
+    scaleRatio = resolution / actualSize;
+    penWidth = resolution / 15;
 }
 
 function penDown(event) {

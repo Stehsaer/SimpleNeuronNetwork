@@ -83,8 +83,13 @@
                 <label class="mui--text-body1">For MNIST datasets only</label>
                 <br />
 
-                <canvas id="canvas" class="mui--z2" width="28" height="28" style="width:300px; height:300px; cursor:crosshair; display:block; margin:20px; border-radius:4px">浏览器不支持canvas<!-- 如果不支持会显示这段文字 --></canvas><br />
-                <button class="mui-btn" onclick="clearCanvas()" style="display:inline">Clear</button>
+                <canvas id="canvas" class="mui--z2" width="300" height="300" style="width:300px; height:300px; cursor:crosshair; display:block; margin:20px; border-radius:4px">浏览器不支持canvas<!-- 如果不支持会显示这段文字 --></canvas>
+
+                <canvas width="28" height="28" style="height:80px; width:80px;" id="hidden-canvas" hidden></canvas>
+
+                <br />
+
+                <button class="mui-btn" onclick="clearCanvas(300)" style="display:inline">Clear</button>
                 <button class="mui-btn mui-btn--primary" onclick="recognize()" style="display:inline">Recognize</button>
             </div>
             <div class="mui-panel display-block" id="train-detail-block" hidden>
@@ -95,20 +100,12 @@
     <script src="query.js"></script>
     <script src="popup.js"></script>
     <script src="draw.js"></script>
+    <script src="scale.js"></script>
     <script>
-		initCanvas(300);
+        var canvasSize = 300;
+        initCanvas(canvasSize, canvasSize);
 
-		function recognize() {
-			var imageData = ctx.getImageData(0,0,28,28).data;
-
-			var pixels = [];
-			for (var pix = 0; pix < 784; pix++) {
-				pixels[pix] = imageData[pix * 4];
-			}
-
-            var outContent = JSON.stringify(pixels);
-            //console.log(outContent);
-
+        function sendRecognizeData(data) {
             var request = new XMLHttpRequest();
 
             request.onreadystatechange = function () {
@@ -126,7 +123,155 @@
             }
 
             request.open("POST", "api/query/recognize");
-            request.send(outContent);
+            request.send(data);
+        }
+
+        function getPixel(pixel, width, x, y) {
+            return pixel[width * y + x];
+        }
+
+        function fileToCanvas(file) {
+            var reader = new FileReader();
+            reader.readAsDataURL(file);//读取图像文件 result 为 DataURL, DataURL 可直接 赋值给 img.src
+            reader.onload = function (event) {
+                var image = new Image();
+                image.src = event.target.result;
+                image.onload = function () {
+                    var canvas = document.getElementById("canvas");
+                    var imageCanvas = canvas.getContext("2d");
+                    imageCanvas.drawImage(image, 0, 0, 300, 300);
+                    canvasToImage(canvas);
+                }
+            }
+        }
+
+        function recognize() {
+            var imageData = ctx.getImageData(0, 0, canvasSize, canvasSize).data;
+
+            var pixels = [];
+            for (var pix = 0; pix < canvasSize * canvasSize; pix++) {
+                pixels[pix] = imageData[pix * 4];
+            }
+
+            var xLeft;
+            var xRight;
+            var yTop;
+            var yBottom;
+
+            var x; var y;
+
+            // get xLeft
+            x = 0;
+            while (x < canvasSize) {
+                y = 0;
+                flag = false;
+                while (y < canvasSize) {
+                    if (getPixel(pixels, canvasSize, x, y) > 0) {
+                        flag = true;
+                        break;
+                    }
+                    y++;
+                }
+                if (flag == true) break;
+                x++;
+            }
+
+            if (x == canvasSize) {
+                showPopup("Empty image!", "Empty image, please draw something on the canvas using the mouse pointer or your finger");
+                return;
+            }
+
+            xLeft = x;
+
+            // get xRight
+            x = canvasSize;
+            while (x > xLeft) {
+                x--;
+                y = 0;
+                flag = false;
+                while (y < canvasSize) {
+                    if (getPixel(pixels, canvasSize, x, y) > 0) {
+                        flag = true;
+                        break;
+                    }
+                    y++;
+                }
+                if (flag == true) break;
+            }
+
+            xRight = x;
+
+            // get yTop
+            y = 0;
+            while (y < canvasSize) {
+                x = xLeft;
+                flag = false;
+                while (x <= xRight) {
+                    if (getPixel(pixels, canvasSize, x, y) > 0) {
+                        flag = true;
+                        break;
+                    }
+                    x++;
+                }
+                if (flag == true) break;
+                y++;
+            }
+
+            yTop = y;
+
+            // get yBottom
+            y = canvasSize;
+            while (y > yTop) {
+                y--;
+                x = xLeft;
+                flag = false;
+                while (x <= xRight) {
+                    if (getPixel(pixels, canvasSize, x, y) > 0) {
+                        flag = true;
+                        break;
+                    }
+                    x++;
+                }
+                if (flag == true) break;
+            }
+
+            yBottom = y;
+
+            var xWidth = xRight - xLeft;
+            var yHeight = yBottom - yTop;
+            var centerMargin = 0.8;
+            var targetSize = 28;
+            var max = Math.max(xWidth, yHeight);
+
+            var actualX = xWidth / max * targetSize * centerMargin;
+            var actualY = yHeight / max * targetSize * centerMargin;
+
+            ctx.strokeStyle = "green";
+            ctx.lineWidth = 2;
+
+            var margin = 5;
+            ctx.strokeRect(xLeft - margin, yTop - margin, xWidth + margin * 2, yHeight + margin * 2);
+
+            //var scaled = scale({ width: Math.floor(xWidth * targetSize / max), height: Math.floor(yHeight * targetSize / max) }, canvas, 'jpeg');
+
+            var hidden_canvas = document.getElementById('hidden-canvas');
+            var hidden_ctx = hidden_canvas.getContext("2d");
+
+            hidden_ctx.fillStyle = "#000000";
+            hidden_ctx.fillRect(0, 0, 28, 28);
+            hidden_ctx.imageSmoothingQuality = "high";
+
+            //hidden_ctx.drawImage(scaled, targetSize / 2 - actualX / 2, targetSize / 2 - actualY / 2);
+            hidden_ctx.drawImage(canvas,xLeft, yTop, xWidth, yHeight,  targetSize / 2 - actualX / 2, targetSize / 2 - actualY / 2, actualX, actualY);
+
+            imageData = hidden_ctx.getImageData(0, 0, targetSize, targetSize).data
+            var scaled_pixels = [];
+            for (var pix = 0; pix < targetSize * targetSize; pix++) {
+                scaled_pixels[pix] = imageData[pix * 4];
+            }
+
+            var str = JSON.stringify(scaled_pixels);
+            sendRecognizeData(str);
         }
 
         function updateResult(result) {
@@ -142,14 +287,14 @@
                 title: {
                     text: 'Result'
                 },
-                tooltip: {formatter: '{c}%'},
+                tooltip: { formatter: '{c}%' },
                 legend: {
                     data: ['Possibility']
                 },
                 xAxis: {
-                    
+
                 },
-                yAxis: {min:0, max:100},
+                yAxis: { min: 0, max: 100 },
                 series: [{
                     name: 'Possibility',
                     type: 'bar',
@@ -158,7 +303,7 @@
             };
 
             var index = 0;
-            
+
 
             option.series[0].data = new Array();
 

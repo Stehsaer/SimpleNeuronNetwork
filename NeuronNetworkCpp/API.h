@@ -16,11 +16,13 @@ namespace API
 		METHOD_LIST_BEGIN
 			METHOD_ADD(Query::GetStatus, "/status", Get);
 		METHOD_ADD(Query::GetDatasetList, "/dataset_list", Get);
+		METHOD_ADD(Query::GetModelList, "/model_list", Get);
 		METHOD_ADD(Query::Recognize, "/recognize", Post);
 		METHOD_LIST_END
 
 			void GetStatus(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& callback);
 		void GetDatasetList(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& callback);
+		void GetModelList(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& callback);
 		void Recognize(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& callback);
 	};
 
@@ -53,7 +55,9 @@ namespace API
 		METHOD_ADD(Command::ClearStatus, "/clear_status", Post);
 		METHOD_ADD(Command::ClearDatasetSlot, "/clear_slot?slot={}", Post);
 		METHOD_ADD(Command::CreateModel, "/create_model?in={}&out={}&layer={}&count={}&func={}", Post);
-		METHOD_ADD(Command::TrainModel, "/train_model?slot={}&learningRate={}&maxIter={}&threshold={}", Get, Post);
+		METHOD_ADD(Command::TrainModel, "/train_model?slot={}&learningRate={}&maxIter={}&threshold={}", Post);
+		METHOD_ADD(Command::SaveModel, "/save_model?name={}", Get, Post);
+		METHOD_ADD(Command::LoadModel, "/load_model?name={}", Get, Post);
 		METHOD_LIST_END
 
 		void ClearDatasetSlot(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& callback, int slot);
@@ -61,5 +65,7 @@ namespace API
 		void ClearStatus(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& callback);
 		void LoadDataset(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& callback, std::string image, std::string label, std::string name, int slot);
 		void CreateModel(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& callback, int inNeuronCount, int outNeuronCount, int layerCount, int layerNeuronCount, int activateFunc);
+		void SaveModel(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& callback, std::string name);
+		void LoadModel(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& callback, std::string name);
 	};
 }

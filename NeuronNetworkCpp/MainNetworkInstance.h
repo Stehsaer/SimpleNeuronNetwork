@@ -55,11 +55,14 @@ extern Network::Framework::BackPropaNetwork* network;
 extern Network::NetworkDataSet datasets[MAX_DATASET_COUNT];
 
 const std::string datasetPath = "web_res/datasets/";
+const std::string modelPath = "web_res/models/";
 const std::string webPagePath = "web/";
 
 void LoadDatasetWork(std::string image, std::string label, int slot, std::string name);
 void ClearDataset(int slot);
 void CreateModelWork(int inNeuronCount, int outNeuronCount, int layerCount, int layerNeuronCount, ActivateFunctionType func);
 void TrainModelWork(int slot, int maxIter, double learningRate, double threshold);
+void LoadModelWork(std::string name);
+void SaveModelWork(std::string name);
 
 #endif

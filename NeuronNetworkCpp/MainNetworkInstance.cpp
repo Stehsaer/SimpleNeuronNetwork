@@ -236,3 +236,113 @@ void TrainModelWork(int slot, int maxIter, double learningRate, double threshold
 		return;
 	}
 }
+
+#define MODEL_SUFFIX ".network"
+
+void LoadModelWork(std::string name)
+{
+	server_status = serverStatus::Working;
+
+	try
+	{
+		clock_t start = clock();
+
+		if (network) network->Destroy();
+
+		// suffix needed
+		Network::ProcessState result = Network::NetworkDataParser::ReadNetworkData(&network, modelPath + name);
+
+		clock_t elapsedTime = clock() - start;
+
+		if (result.success)
+		{
+			serverProgressDisplay = std::format("Completed! Elapsed time: {}ms", elapsedTime);
+			serverProgress = 0.0f;
+			progressSuccess = 1;
+
+			server_status = serverStatus::Done;
+
+			return;
+		}
+		else
+		{
+			serverProgressDisplay = result.msg; std::cout << serverProgressDisplay << std::endl; // print out error
+			serverProgress = 0.0f;
+			progressSuccess = 0;
+
+			server_status = serverStatus::Done;
+
+			return;
+		}
+	}
+	catch (std::exception e)
+	{
+		serverProgressDisplay = std::format("Unhandled exception: {}", e.what()); std::cout << serverProgressDisplay << std::endl; // print out error
+		serverProgress = 0.0f;
+		progressSuccess = 0;
+
+		server_status = serverStatus::Done;
+
+		return;
+	}
+}
+
+void SaveModelWork(std::string name)
+{
+	server_status = serverStatus::Working;
+
+	try
+	{
+		clock_t start = clock();
+
+		if (!network)
+		{
+			throw std::invalid_argument("Network Instance is empty!");
+		}
+
+		Network::ProcessState result = Network::NetworkDataParser::SaveNetworkData(network, modelPath + name + MODEL_SUFFIX);
+
+		clock_t elapsedTime = clock() - start;
+
+		if (result.success)
+		{
+			serverProgressDisplay = std::format("Completed! Elapsed time: {}ms", elapsedTime);
+			serverProgress = 0.0f;
+			progressSuccess = 1;
+
+			server_status = serverStatus::Done;
+
+			return;
+		}
+		else
+		{
+			serverProgressDisplay = result.msg; std::cout << serverProgressDisplay << std::endl; // print out error
+			serverProgress = 0.0f;
+			progressSuccess = 0;
+
+			server_status = serverStatus::Done;
+
+			return;
+		}
+	}
+	catch (std::invalid_argument e)
+	{
+		serverProgressDisplay = e.what(); std::cout << serverProgressDisplay << std::endl; // print out error
+		serverProgress = 0.0f;
+		progressSuccess = 0;
+
+		server_status = serverStatus::Done;
+
+		return;
+	}
+	catch (std::exception e)
+	{
+		serverProgressDisplay = std::format("Unhandled exception: {}", e.what()); std::cout << serverProgressDisplay << std::endl; // print out error
+		serverProgress = 0.0f;
+		progressSuccess = 0;
+
+		server_status = serverStatus::Done;
+
+		return;
+	}
+}

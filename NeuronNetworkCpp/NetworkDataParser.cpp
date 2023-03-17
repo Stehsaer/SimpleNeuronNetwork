@@ -21,8 +21,7 @@ bool isLittleEndian()
 
 void Reverse(int* x) // convert MSB & LSB
 {
-	int y = 0;
-	y = y | (0xff000000 & *x) >> 24;
+	int y = (0xff000000 & *x) >> 24;
 	y = y | (0x00ff0000 & *x) >> 8;
 	y = y | (0x0000ff00 & *x) << 8;
 	y = y | (0x000000ff & *x) << 24;
@@ -40,7 +39,7 @@ void WriteInt32(int src, unsigned char* dst, int offset)
 {
 	int _src = src;
 	if (isLittleEndian()) Reverse(&_src);
-	memcpy(dst + offset, &src, sizeof(int));
+	memcpy(dst + offset, &_src, sizeof(int));
 }
 
 int GetInt32Reverse(unsigned char* data, int offset)
@@ -437,7 +436,7 @@ ProcessState NetworkDataParser::ReadNetworkData(Network::Framework::BackPropaNet
 	{
 		delete[] data;
 
-		return ProcessState(false, "Network Reading Error");
+		return ProcessState(false, "Network Reading Error (Magic Number Mismatch)");
 	}
 
 	int inNeuronCount = GetInt32(data, 0x04);
@@ -482,7 +481,7 @@ ProcessState NetworkDataParser::ReadNetworkData(Network::Framework::BackPropaNet
 		delete nwk;
 		delete[] data;
 
-		return ProcessState(false, "Network Reading Error");
+		return ProcessState(false, "Network Reading Error (Out Layer)");
 	}
 
 	for (auto& layer : nwk->hiddenLayerList)
@@ -494,7 +493,7 @@ ProcessState NetworkDataParser::ReadNetworkData(Network::Framework::BackPropaNet
 			delete nwk;
 			delete[] data;
 
-			return ProcessState(false, "Network Reading Error");
+			return ProcessState(false, "Network Reading Error (Hidden Layer)");
 		}
 	}
 
@@ -506,7 +505,7 @@ ProcessState NetworkDataParser::ReadNetworkData(Network::Framework::BackPropaNet
 		delete nwk;
 		delete[] data;
 
-		return ProcessState(false, "Network Reading Error");
+		return ProcessState(false, "Network Reading Error (End Data Mismatch)");
 	}
 
 	// free space
