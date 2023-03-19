@@ -5,12 +5,8 @@
 
 namespace Network
 {
-	/*
-	CHANGELOG:
+	typedef double (*ActivateFunction)(double);
 
-		2023-2-20:
-			MODIFY NormalizeData(...); Added offset option and flexibility that comes along; Change output type from double to float
-	*/
 	namespace Algorithm
 	{
 		enum NormalizationMode
@@ -26,12 +22,33 @@ namespace Network
 		double ShiftedSigmoid_D(double x);
 		double ReLU(double x);
 		double ReLU_D(double x);
+		double LeakyReLU(double x);
+		double LeakyReLU_D(double x);
 
 		float* NormalizeData(unsigned char* data, int offset, int dataSize, NormalizationMode mode);
 
 		void SoftMax(NeuronLayer& layer);
 		void SoftMaxGetError(NeuronLayer& layer, double* target);
 	}
+
+	enum class ActivateFunctionType
+	{
+		Sigmoid, SigmoidShifted, ReLU, LeackyReLU
+	};
+
+	inline const Network::ActivateFunction forwardFuncList[] =
+	{ &Network::Algorithm::Sigmoid,
+	&Network::Algorithm::ShiftedSigmoid ,
+	&Network::Algorithm::ReLU ,
+	&Network::Algorithm::LeakyReLU
+	};
+
+	inline const Network::ActivateFunction backwardFuncList[] =
+	{ &Network::Algorithm::Sigmoid_D,
+	&Network::Algorithm::ShiftedSigmoid_D ,
+	&Network::Algorithm::ReLU_D ,
+	&Network::Algorithm::LeakyReLU_D
+	};
 }
 
 #endif

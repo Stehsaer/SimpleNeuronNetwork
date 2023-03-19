@@ -199,7 +199,7 @@ void Command::CreateModel(const HttpRequestPtr& req, std::function<void(const Ht
 
 		std::cout << std::format("Create Model: {},{},{},{},{}", inNeuronCount,outNeuronCount,layerCount,layerNeuronCount,activateFunc) << std::endl;
 
-		std::thread thr(CreateModelWork, inNeuronCount, outNeuronCount, layerCount, layerNeuronCount, (ActivateFunctionType)activateFunc);
+		std::thread thr(CreateModelWork, inNeuronCount, outNeuronCount, layerCount, layerNeuronCount, (Network::ActivateFunctionType)activateFunc);
 		thr.detach();
 
 		response->setStatusCode(k200OK);

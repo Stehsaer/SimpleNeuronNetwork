@@ -8,6 +8,7 @@ Function: Contains main network objects needed for main thread
 #define _NETWORK_INSTANCE_H_
 
 #include "Network.h"
+
 #include <string>
 #include <vector>
 
@@ -30,11 +31,6 @@ enum class serverTask
 	RecognizeInput = 4
 };
 
-enum class ActivateFunctionType
-{
-	Sigmoid, SigmoidShifted, ReLU
-};
-
 struct TrainSnapshot
 {
 	int index;
@@ -49,6 +45,7 @@ extern std::string serverProgressDisplay;
 extern serverTask server_task;
 extern serverStatus server_status;
 extern int progressSuccess; // -1: none; 0: fail; 1:success;
+extern bool trainTerminate;
 
 extern Network::Framework::BackPropaNetwork* network;
 
@@ -60,7 +57,7 @@ const std::string webPagePath = "web/";
 
 void LoadDatasetWork(std::string image, std::string label, int slot, std::string name);
 void ClearDataset(int slot);
-void CreateModelWork(int inNeuronCount, int outNeuronCount, int layerCount, int layerNeuronCount, ActivateFunctionType func);
+void CreateModelWork(int inNeuronCount, int outNeuronCount, int layerCount, int layerNeuronCount, Network::ActivateFunctionType func);
 void TrainModelWork(int slot, int maxIter, double learningRate, double threshold);
 void LoadModelWork(std::string name);
 void SaveModelWork(std::string name);

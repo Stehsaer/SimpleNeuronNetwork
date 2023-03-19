@@ -443,32 +443,13 @@ ProcessState NetworkDataParser::ReadNetworkData(Network::Framework::BackPropaNet
 	int outNeuronCount = GetInt32(data, 0x08);
 	int hiddenNeuronCount = GetInt32(data, 0x0c);
 	int hiddenLayerCount = GetInt32(data, 0x10);
-	int ForwardActiveFunction = GetInt32(data, 0x14);
+	int ActiveFunctionCode = GetInt32(data, 0x14);
 
 	// select activation function
-	double (*ForwardActive)(double);
-	double (*BackwardActive)(double);
+	Network::ActivateFunction ForwardActive, BackwardActive;
 
-	switch (ForwardActiveFunction)
-	{
-	case 0:
-		ForwardActive = &Network::Algorithm::Sigmoid;
-		BackwardActive = &Network::Algorithm::Sigmoid_D;
-		break;
-	case 1:
-		ForwardActive = &Network::Algorithm::ShiftedSigmoid;
-		BackwardActive = &Network::Algorithm::ShiftedSigmoid_D;
-		break;
-	case 2:
-		ForwardActive = &Network::Algorithm::ReLU;
-		BackwardActive = &Network::Algorithm::ReLU_D;
-		break;
-	default:
-		ForwardActive = &Network::Algorithm::Sigmoid;
-		BackwardActive = &Network::Algorithm::Sigmoid_D;
-		break;
-	}
-
+	ForwardActive = Network::forwardFuncList[ActiveFunctionCode];
+	BackwardActive = Network::backwardFuncList[ActiveFunctionCode];
 
 	Network::Framework::BackPropaNetwork * nwk = new Network::Framework::BackPropaNetwork(inNeuronCount, outNeuronCount, hiddenNeuronCount, hiddenLayerCount, ForwardActive, BackwardActive, DBL_MAX);
 

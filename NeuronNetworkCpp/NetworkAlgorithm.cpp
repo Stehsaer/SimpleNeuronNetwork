@@ -34,6 +34,18 @@ double Network::Algorithm::ReLU_D(double x)
 	return x > 0.0 ? 1.0 : 0.0;
 }
 
+#define LEAKY_RELU_CONST 0.01
+
+double Network::Algorithm::LeakyReLU(double x)
+{
+	return x > 0.0 ? x : x * LEAKY_RELU_CONST;
+}
+
+double Network::Algorithm::LeakyReLU_D(double x)
+{
+	return x > 0.0 ? 1.0 : LEAKY_RELU_CONST;
+}
+
 // NOTE: Added offset (2023-2-20)
 void Normalization_ZeroToOne(float* dataOut, int offset, unsigned char* data, int dataSize)
 {
@@ -113,3 +125,4 @@ void Network::Algorithm::SoftMaxGetError(NeuronLayer& layer, double* target)
 		layer[i].error = target[i] - layer[i].value;
 	}
 }
+

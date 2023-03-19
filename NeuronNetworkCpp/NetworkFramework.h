@@ -7,8 +7,6 @@
 
 namespace Network
 {
-	typedef double (*ActivateFunction)(double);
-
 	namespace Framework
 	{
 		class BackPropaNetwork

@@ -18,6 +18,10 @@ Network::NetworkDataSet datasets[MAX_DATASET_COUNT];
 
 std::vector<TrainSnapshot> snapshots;
 
+bool trainTerminate = false;
+
+using ActivateFunctionType = Network::ActivateFunctionType;
+
 // works
 
 void LoadDatasetWork(std::string image, std::string label, int slot, std::string name)
@@ -112,26 +116,10 @@ void CreateModelWork(int inNeuronCount, int outNeuronCount, int layerCount, int 
 		}
 
 		// set activate function
-		Network::ActivateFunction forward = nullptr, backward = nullptr;
+		Network::ActivateFunction forward, backward;
 
-		switch (func)
-		{
-		case ActivateFunctionType::Sigmoid:
-			forward = *Network::Algorithm::Sigmoid;
-			backward = *Network::Algorithm::Sigmoid_D;
-			break;
-		case ActivateFunctionType::SigmoidShifted:
-			forward = *Network::Algorithm::ShiftedSigmoid;
-			backward = *Network::Algorithm::ShiftedSigmoid_D;
-			break;
-		case ActivateFunctionType::ReLU:
-			forward = *Network::Algorithm::ReLU;
-			backward = *Network::Algorithm::ReLU_D;
-			break;
-		default:
-			forward = *Network::Algorithm::ReLU;
-			backward = *Network::Algorithm::ReLU_D;
-		}
+		forward = Network::forwardFuncList[(int)func];
+		backward = Network::backwardFuncList[(int)func];
 
 		network = new Network::Framework::BackPropaNetwork(inNeuronCount, outNeuronCount, layerNeuronCount, layerCount, forward, backward, 0.0);
 		network->RandomizeAllWeights(0.1, 0.9);
@@ -162,6 +150,7 @@ void CreateModelWork(int inNeuronCount, int outNeuronCount, int layerCount, int 
 void TrainModelWork(int slot, int maxIter, double learningRate, double threshold)
 {
 	server_status = serverStatus::Working;
+	trainTerminate = false;
 
 	try
 	{
@@ -194,22 +183,33 @@ void TrainModelWork(int slot, int maxIter, double learningRate, double threshold
 
 		clock_t start = clock();
 
+		char* progressText = new char[256];
+
 		for (int i = 0; i < dataset->Count(); i++)
 		{
 			// update progress
 			serverProgress = (float)i / (float)dataset->Count();
 			if (i % TRAIN_REPORT_RATE == 0)
 			{
-				serverProgressDisplay = std::format("Training {}/{}. Loss: {}", i, dataset->Count(), network->loss);
+				
+				snprintf(progressText, 256, "Training %d/%d. Loss: %.5f", i, dataset->Count(), network->loss);
+				serverProgressDisplay = progressText;
+
 				std::cout << serverProgressDisplay << std::endl;
 			}
 
 			network->Train(*(dataset->dataSet[i]), maxIter, threshold);
 		}
 
+		serverProgressDisplay = "Calculating Accuracy";
+		serverProgress = -1;
+		double accuracy = network->GetAccuracy(*dataset);
+
 		clock_t elapsedTime = clock() - start;
 
-		serverProgressDisplay = std::format("Completed! Elapsed time: {}ms", elapsedTime);
+		snprintf(progressText, 256, "Completed! <strong>Accuracy: %.4f%%</strong><br/>Elapsed time: %.3fs", accuracy * 100.0, elapsedTime / 1000.0);
+
+		serverProgressDisplay = progressText;
 		serverProgress = 1.0f;
 		progressSuccess = 1;
 

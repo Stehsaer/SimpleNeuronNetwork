@@ -24,7 +24,7 @@ function refresh_model_status(status_json) {
 
 		for (var num = 0; num < max_dataset_num; num++) {
 			var d = status_json["datasets_info"][num];
-			$("#slot-input").append(`<option value="${num}">${d["name"]} (Slot ${num}) ${d["data_count"] <= 0 ? "(Empty)":""}</option>`);
+			$("#slot-input").append(`<option value="${num}">${d["name"]} (Slot ${num + 1}) ${d["data_count"] <= 0 ? "(Empty)":""}</option>`);
 		}
 
 	} prev_slot = status_json["datasets_info"];
@@ -32,8 +32,17 @@ function refresh_model_status(status_json) {
 	if (status_json["status"] > 0 && status_json["current_task"] == 3) {
 		$("#train-detail-block").show();
 
-		$("#progress-text").text(`${Math.round(status_json["progress"] * 100, 2)}%`);
-		$("#progress-indicator").val(status_json["progress"]);
+		var progress = status_json["progress"];
+
+		if (progress < 0) {
+			$("#progress-indicator").removeAttr("value");
+			$("#progress-text").hide();
+		}
+		else {
+			$("#progress-indicator").val(status_json["progress"]);
+			$("#progress-text").show();
+			$("#progress-text").text(`${Math.round(progress * 100, 2)}%`);
+        }
 		$("#progress-detail").text(status_json["status_text"]);
 
 	}
