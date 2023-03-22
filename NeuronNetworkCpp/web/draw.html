@@ -94,6 +94,7 @@
             </div>
             <div class="mui-panel display-block" id="train-detail-block" hidden>
                 <div id="result-chart" style="width:500px; height:300px"></div>
+                <label id="time-show"></label>
             </div>
         </div>
     </div>
@@ -309,11 +310,15 @@
 
             option.xAxis.data = new Array();
 
-            result_json.forEach(element => {
+            var results = result_json["result"];
+
+            results.forEach(element => {
                 option.xAxis.data[index] = index;
-                option.series[0].data[index] = (result_json[index] * 100).toFixed(2);
+                option.series[0].data[index] = (element * 100).toFixed(2);
                 index++;
             });
+
+            $("#time-show").text(`Time elapsed: ${(result_json["time"] / 1000.0).toFixed(1)}μs`);
 
             myChart.setOption(option);
         }

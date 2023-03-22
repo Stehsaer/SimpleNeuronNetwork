@@ -7,6 +7,10 @@
 using namespace std::filesystem;
 using namespace Network;
 
+/// <summary>
+/// Tell if the computer runs on a little-endian system
+/// </summary>
+/// <returns>True for little-endian, False for big-endian</returns>
 bool isLittleEndian()
 {
 	union U
@@ -19,7 +23,11 @@ bool isLittleEndian()
 	return u.c == 1;
 }
 
-void Reverse(int* x) // convert MSB & LSB
+/// <summary>
+/// Convert a number between MSB and LSB
+/// </summary>
+/// <param name="x">Target int</param>
+void Reverse(int* x)
 {
 	int y = (0xff000000 & *x) >> 24;
 	y = y | (0x00ff0000 & *x) >> 8;
@@ -28,6 +36,12 @@ void Reverse(int* x) // convert MSB & LSB
 	*x = y;
 }
 
+/// <summary>
+/// Get int number from a specfic memory location
+/// </summary>
+/// <param name="data">Data pointer</param>
+/// <param name="offset">Offset from the starting position</param>
+/// <returns>Int</returns>
 int GetInt32NoReverse(unsigned char* data, int offset)
 {
 	int out;
@@ -35,13 +49,12 @@ int GetInt32NoReverse(unsigned char* data, int offset)
 	return out;
 }
 
-void WriteInt32(int src, unsigned char* dst, int offset)
-{
-	int _src = src;
-	if (isLittleEndian()) Reverse(&_src);
-	memcpy(dst + offset, &_src, sizeof(int));
-}
-
+/// <summary>
+/// Get int number from a specfic memory location
+/// </summary>
+/// <param name="data">Data pointer</param>
+/// <param name="offset">Offset from the starting position</param>
+/// <returns>Int</returns>
 int GetInt32Reverse(unsigned char* data, int offset)
 {
 	int out;
@@ -50,6 +63,25 @@ int GetInt32Reverse(unsigned char* data, int offset)
 	return out;
 }
 
+/// <summary>
+/// Write an int into a specfic memory location
+/// </summary>
+/// <param name="src">Source number</param>
+/// <param name="dst">Target data</param>
+/// <param name="offset">Offset from start</param>
+void WriteInt32(int src, unsigned char* dst, int offset)
+{
+	int _src = src;
+	if (isLittleEndian()) Reverse(&_src);
+	memcpy(dst + offset, &_src, sizeof(int));
+}
+
+/// <summary>
+/// Get an int, endian tackled
+/// </summary>
+/// <param name="data">Data pointer</param>
+/// <param name="offset">Offset</param>
+/// <returns></returns>
 int GetInt32(unsigned char* data, int offset)
 {
 	if (isLittleEndian())
@@ -266,7 +298,7 @@ void WriteData_Layer(NeuronLayer* layer, unsigned char** data)
 	*data = ptrNeuron;
 }
 
-ProcessState NetworkDataParser::SaveNetworkData(Network::Framework::BackPropaNetwork* network, std::string path)
+ProcessState NetworkDataParser::SaveNetworkData(Network::Framework::FullConnNetwork* network, std::string path)
 {
 	// Calculate required space
 	int lengthRequired = 0;
@@ -295,22 +327,19 @@ ProcessState NetworkDataParser::SaveNetworkData(Network::Framework::BackPropaNet
 	WriteInt32(network->hiddenNeuronCount, data, 0x0c);
 	WriteInt32(network->hiddenLayerCount, data, 0x10);
 
-	// Active Function
-	if (network->ForwardActive == &Network::Algorithm::Sigmoid)
+	for (int i = 0; i < ActivateFunctionCount; i++)
 	{
-		WriteInt32(0, data, 0x14);
-	}
-	else if (network->ForwardActive == &Network::Algorithm::ShiftedSigmoid)
-	{
-		WriteInt32(1, data, 0x14);
-	}
-	else if (network->ForwardActive == &Network::Algorithm::ReLU)
-	{
-		WriteInt32(2, data, 0x14);
-	}
-	else
-	{
-		WriteInt32(-1, data, 0x14);
+		if (forwardFuncList[i] == network->ForwardActive && backwardFuncList[i] == network->BackwardActive)
+		{
+			WriteInt32(i, data, 0x14);
+			break;
+		}
+
+		if (i == ActivateFunctionCount - 1) // activation function not found
+		{
+			delete[] data;
+			throw std::invalid_argument("Activate Function Invalid!");
+		}
 	}
 
 	// Actual Data
@@ -403,7 +432,7 @@ bool ReadNetwork_Layer(unsigned char** data, NeuronLayer* layer)
 	return true;
 }
 
-ProcessState NetworkDataParser::ReadNetworkData(Network::Framework::BackPropaNetwork** network, std::string _path)
+ProcessState NetworkDataParser::ReadNetworkData(Network::Framework::FullConnNetwork** network, std::string _path)
 {
 	if (!exists(std::filesystem::path(_path)))
 	{
@@ -443,15 +472,9 @@ ProcessState NetworkDataParser::ReadNetworkData(Network::Framework::BackPropaNet
 	int outNeuronCount = GetInt32(data, 0x08);
 	int hiddenNeuronCount = GetInt32(data, 0x0c);
 	int hiddenLayerCount = GetInt32(data, 0x10);
-	int ActiveFunctionCode = GetInt32(data, 0x14);
+	int ActivateFunctionCode = GetInt32(data, 0x14);
 
-	// select activation function
-	Network::ActivateFunction ForwardActive, BackwardActive;
-
-	ForwardActive = Network::forwardFuncList[ActiveFunctionCode];
-	BackwardActive = Network::backwardFuncList[ActiveFunctionCode];
-
-	Network::Framework::BackPropaNetwork * nwk = new Network::Framework::BackPropaNetwork(inNeuronCount, outNeuronCount, hiddenNeuronCount, hiddenLayerCount, ForwardActive, BackwardActive, DBL_MAX);
+	Network::Framework::FullConnNetwork * nwk = new Network::Framework::FullConnNetwork(inNeuronCount, outNeuronCount, hiddenNeuronCount, hiddenLayerCount, (ActivateFunctionType)ActivateFunctionCode, DBL_MAX);
 
 	unsigned char* ptr = data + 0x18;
 

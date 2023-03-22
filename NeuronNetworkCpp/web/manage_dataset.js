@@ -11,20 +11,25 @@ function do_table_refresh() {
         var size = element["size"] / 1048576;
         size = size.toFixed(3);
 
-        var clas = name == label_name || name == image_name ? "mui-btn--accent" : "mui-btn--primary";
-        var txt = name == label_name || name == image_name ? "Unselect" : "Select";
+        if (name.endsWith(".images") || name.endsWith(".labels")) {
 
-        var disb = "";
-        if (name != label_name && name.endsWith(".labels") && label_name != null) disb = "disabled";
-        if (name != image_name && name.endsWith(".images") && image_name != null) disb = "disabled";
+            var disb = "";
 
-        $("#dataset-list-table>tbody").append(`
+            var clas = name == label_name || name == image_name ? "mui-btn--accent" : "mui-btn--primary";
+            var txt = name == label_name || name == image_name ? "Unselect" : "Select";
+
+            if (name != label_name && name.endsWith(".labels") && label_name != null) disb = "disabled";
+            if (name != image_name && name.endsWith(".images") && image_name != null) disb = "disabled";
+
+            $("#dataset-list-table>tbody").append(`
                         <tr >
                             <td>${name}</td>
                             <td>${size} MB</td>
                             <td><button name="${name}" class="mui-btn dataset-select mui--z1 ${clas}" ${disb}>${txt}</button></td>
                         </tr>
                     `);
+        }
+
     });
 }
 
@@ -125,6 +130,8 @@ function doUpdate(status_json) {
 </tr>`)
     });
 
+    update_status(status_json);
+
     get_success(status_json);
 }
 
@@ -161,7 +168,12 @@ function LoadDataset() {
             showPopup("Network Error", `Network error, try again later.<br/>Message: ${statusText}`);
         }
 
-        request.open("POST", `/api/command/load_dataset?image=${image_name}&label=${label_name}&name=${name}&slot=${slot}`);
+        var requestStr = `/api/command/load_dataset?image=${image_name}&label=${label_name}&name=${name}&slot=${slot}`;
+        if ($("#flip-checkbox").prop("checked")) {
+            requestStr += "&flip";
+        }
+
+        request.open("POST", requestStr);
         request.send(null);
 
         image_name = null;

@@ -32,8 +32,8 @@ namespace Network
 		static const int LabelMagicNumber = 2049;
 
 		static ProcessState ReadMNISTData(NetworkDataSet* dataSet, std::string dataPath, std::string labelPath, Network::Algorithm::NormalizationMode mode);
-		static ProcessState SaveNetworkData(Network::Framework::BackPropaNetwork* network, std::string path);
-		static ProcessState ReadNetworkData(Network::Framework::BackPropaNetwork** network, std::string path);
+		static ProcessState SaveNetworkData(Network::Framework::FullConnNetwork* network, std::string path);
+		static ProcessState ReadNetworkData(Network::Framework::FullConnNetwork** network, std::string path);
 	};
 }
 

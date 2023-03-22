@@ -1,3 +1,5 @@
+const interval = 200;
+
 function interval_update(doCycle, func) {
     var request = new XMLHttpRequest();
 
@@ -16,7 +18,7 @@ function interval_update(doCycle, func) {
 
             func(temp);
 
-            if (doCycle == true) setTimeout(function () { interval_update(true, func) }, 500);
+            if (doCycle == true) setTimeout(function () { interval_update(true, func) }, interval);
         }
     }
 

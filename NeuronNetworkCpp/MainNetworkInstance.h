@@ -42,12 +42,12 @@ struct TrainSnapshot
 extern std::string status_text;
 extern float serverProgress;
 extern std::string serverProgressDisplay;
-extern serverTask server_task;
+extern serverTask serverCurrentTask;
 extern serverStatus server_status;
 extern int progressSuccess; // -1: none; 0: fail; 1:success;
 extern bool trainTerminate;
 
-extern Network::Framework::BackPropaNetwork* network;
+extern Network::Framework::FullConnNetwork* network;
 
 extern Network::NetworkDataSet datasets[MAX_DATASET_COUNT];
 
@@ -55,10 +55,10 @@ const std::string datasetPath = "web_res/datasets/";
 const std::string modelPath = "web_res/models/";
 const std::string webPagePath = "web/";
 
-void LoadDatasetWork(std::string image, std::string label, int slot, std::string name);
+void LoadDatasetWork(std::string image, std::string label, int slot, std::string name, bool flip);
 void ClearDataset(int slot);
 void CreateModelWork(int inNeuronCount, int outNeuronCount, int layerCount, int layerNeuronCount, Network::ActivateFunctionType func);
-void TrainModelWork(int slot, int maxIter, double learningRate, double threshold);
+void TrainModelWork(int slot, int maxIter, double learningRate, double threshold, int verifySlot);
 void LoadModelWork(std::string name);
 void SaveModelWork(std::string name);
 

@@ -144,7 +144,7 @@
                     <tbody>
                     </tbody>
                 </table>
-                <br/>
+                <br />
                 <div class="mui-textfield" width="auto">
                     <input type="text" value="" id="name-input" required>
                     <label>Name</label>
@@ -161,6 +161,12 @@
                     </select>
                     <label>Dataset</label>
                 </div>
+                <div class="mui-select" width="auto">
+                    <select id="verify-slot-input">
+                        <option value="0">Dataset (Slot 0)</option>
+                    </select>
+                    <label>Verify Dataset</label>
+                </div>
                 <div class="mui-textfield" width="auto">
                     <input type="number" value="0.05" id="learning-rate-input" min="0" max="1" step="0.000001" required>
                     <label>Learning Rate</label>
@@ -175,20 +181,17 @@
                 </div>
 
                 <button class="mui-btn mui-btn--primary" onclick="start_training()">Train</button>
-            </div>
-            <div class="mui-panel display-block" id="train-detail-block" style="width:300px" hidden>
-                <legend class="mui--text-headline">Train Details</legend>
-                <br />
-
-                <span id="progress-text" class="mui--text-body1">50%</span><progress value="0.5" id="progress-indicator" style="margin-left:10px; display:inline; width:200px"></progress><br />
-                <span id="progress-detail"></span>
+                <button class="mui-btn" onclick="start_verify()">Verify</button>
             </div>
         </div>
     </div>
+    <script src="progress_display.js"></script>
     <script src="query.js"></script>
     <script src="popup.js"></script>
     <script src="manage_model.js"></script>
     <script>
+
+        init_progress_display();
 
         function refreshModelList(response) {
             var list = JSON.parse(response);

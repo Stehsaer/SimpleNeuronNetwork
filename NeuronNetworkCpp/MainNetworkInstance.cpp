@@ -5,14 +5,14 @@
 // global variables
 serverStatus server_status = serverStatus::Idle;
 std::string serverProgressDisplay = "";
-serverTask server_task = serverTask::None;
+serverTask serverCurrentTask = serverTask::None;
 
 std::string status_text = "Idle";
 float serverProgress = 0.0f;
 
 int progressSuccess = -1;
 
-Network::Framework::BackPropaNetwork* network = nullptr;
+Network::Framework::FullConnNetwork* network = nullptr;
 
 Network::NetworkDataSet datasets[MAX_DATASET_COUNT];
 
@@ -24,9 +24,11 @@ using ActivateFunctionType = Network::ActivateFunctionType;
 
 // works
 
-void LoadDatasetWork(std::string image, std::string label, int slot, std::string name)
+void LoadDatasetWork(std::string image, std::string label, int slot, std::string name, bool flip)
 {
 	server_status = serverStatus::Working;
+	serverProgressDisplay = "Loading Dataset";
+	serverProgress = -1;
 
 	if (slot < 0 || slot >= MAX_DATASET_COUNT)
 	{
@@ -45,6 +47,11 @@ void LoadDatasetWork(std::string image, std::string label, int slot, std::string
 	clock_t start = clock();
 
 	Network::ProcessState result = Network::NetworkDataParser::ReadMNISTData(&datasets[slot], datasetPath + image, datasetPath + label, Network::Algorithm::NormalizationMode::ZeroToOne);
+
+	if (flip)
+	{
+		datasets[slot].FlipXY();
+	}
 
 	clock_t elapsedTime = clock() - start;
 
@@ -73,6 +80,8 @@ void LoadDatasetWork(std::string image, std::string label, int slot, std::string
 void ClearDataset(int slot)
 {
 	server_status = serverStatus::Working;
+	serverProgress = -1;
+	serverProgressDisplay = "Clearing Dataset";
 
 	if (slot < 0 || slot >= MAX_DATASET_COUNT)
 	{
@@ -104,6 +113,8 @@ void ClearDataset(int slot)
 void CreateModelWork(int inNeuronCount, int outNeuronCount, int layerCount, int layerNeuronCount, ActivateFunctionType func)
 {
 	server_status = serverStatus::Working;
+	serverProgress = -1;
+	serverProgressDisplay = "Creating Network";
 
 	try
 	{
@@ -121,7 +132,7 @@ void CreateModelWork(int inNeuronCount, int outNeuronCount, int layerCount, int 
 		forward = Network::forwardFuncList[(int)func];
 		backward = Network::backwardFuncList[(int)func];
 
-		network = new Network::Framework::BackPropaNetwork(inNeuronCount, outNeuronCount, layerNeuronCount, layerCount, forward, backward, 0.0);
+		network = new Network::Framework::FullConnNetwork(inNeuronCount, outNeuronCount, layerNeuronCount, layerCount, func, 0.0);
 		network->RandomizeAllWeights(0.1, 0.9);
 
 		clock_t elapsedTime = clock() - start;
@@ -147,20 +158,21 @@ void CreateModelWork(int inNeuronCount, int outNeuronCount, int layerCount, int 
 
 #define TRAIN_REPORT_RATE 100
 
-void TrainModelWork(int slot, int maxIter, double learningRate, double threshold)
+void TrainModelWork(int slot, int maxIter, double learningRate, double threshold, int verifySlot)
 {
 	server_status = serverStatus::Working;
 	trainTerminate = false;
 
 	try
 	{
+		// error detections
 		if (network == nullptr)
 		{
 			throw std::invalid_argument("Network not loaded!");
 		}
 
 		// verify arguments
-		if (slot < 0 || slot >= MAX_DATASET_COUNT || learningRate < 0.0 || maxIter <=0)
+		if (slot < 0 || slot >= MAX_DATASET_COUNT || verifySlot < 0 || verifySlot >= MAX_DATASET_COUNT || learningRate < 0.0 || maxIter < 0)
 		{
 			throw std::invalid_argument("Invalid Argument!");
 		}
@@ -179,11 +191,22 @@ void TrainModelWork(int slot, int maxIter, double learningRate, double threshold
 			throw std::invalid_argument("Dimension mismatch!");
 		}
 
+		// do shuffling
+		serverProgressDisplay = "Shuffling Dataset...";
+		serverProgress = -1;
+
+		dataset->Shuffle();
+
 		network->learningRate = learningRate;
 
 		clock_t start = clock();
 
 		char* progressText = new char[256];
+
+		if (maxIter == 0) // 0 for verify only
+		{
+			goto VERIFY_SLOT;
+		}
 
 		for (int i = 0; i < dataset->Count(); i++)
 		{
@@ -199,11 +222,15 @@ void TrainModelWork(int slot, int maxIter, double learningRate, double threshold
 			}
 
 			network->Train(*(dataset->dataSet[i]), maxIter, threshold);
+
+			_ASSERT(!isnan(network->loss));
 		}
 
+		VERIFY_SLOT:
+
 		serverProgressDisplay = "Calculating Accuracy";
-		serverProgress = -1;
-		double accuracy = network->GetAccuracy(*dataset);
+		serverProgress = 0.0f;
+		double accuracy = network->GetAccuracyCallbackFloat(datasets[verifySlot], &serverProgress);
 
 		clock_t elapsedTime = clock() - start;
 
@@ -242,6 +269,8 @@ void TrainModelWork(int slot, int maxIter, double learningRate, double threshold
 void LoadModelWork(std::string name)
 {
 	server_status = serverStatus::Working;
+	serverProgress = -1;
+	serverProgressDisplay = "Loading Network";
 
 	try
 	{

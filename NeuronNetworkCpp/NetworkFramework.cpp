@@ -9,7 +9,7 @@
 using namespace Network::Framework;
 using namespace Network::Algorithm;
 
-BackPropaNetwork::BackPropaNetwork(int inNeuronCount, int outNeuronCount, int hiddenNeuronCount, int hiddenLayerCount, ActivateFunction ForwardFunc, ActivateFunction BackwardFunc, double learningRate)
+FullConnNetwork::FullConnNetwork(int inNeuronCount, int outNeuronCount, int hiddenNeuronCount, int hiddenLayerCount, ActivateFunctionType ActivateFunc, double learningRate)
 {
 	if (inNeuronCount <= 0 || outNeuronCount <= 0 || hiddenNeuronCount <= 0 || hiddenLayerCount <= 0 || learningRate < 0.0)
 	{
@@ -25,8 +25,10 @@ BackPropaNetwork::BackPropaNetwork(int inNeuronCount, int outNeuronCount, int hi
 	this->loss = 0.0;
 	this->targetData = new double[outNeuronCount];
 
-	ForwardActive = ForwardFunc;
-	BackwardActive = BackwardFunc;
+	this->ActivateFunc = ActivateFunc;
+
+	ForwardActive = forwardFuncList[(int)ActivateFunc];
+	BackwardActive = backwardFuncList[(int)ActivateFunc];
 
 	inLayer = NeuronLayer(inNeuronCount, 0);
 	outLayer = NeuronLayer(outNeuronCount, hiddenNeuronCount);
@@ -38,7 +40,7 @@ BackPropaNetwork::BackPropaNetwork(int inNeuronCount, int outNeuronCount, int hi
 	}
 }
 
-double BackPropaNetwork::GetLoss()
+double FullConnNetwork::GetLoss()
 {
 	loss = 0.0;
 	
@@ -50,7 +52,7 @@ double BackPropaNetwork::GetLoss()
 	return loss;
 }
 
-void BackPropaNetwork::RandomizeAllWeights(double min, double max)
+void FullConnNetwork::RandomizeAllWeights(double min, double max)
 {
 	outLayer.RandomizeAllWeights(min, max);
 
@@ -60,7 +62,7 @@ void BackPropaNetwork::RandomizeAllWeights(double min, double max)
 	}
 }
 
-void BackPropaNetwork::SetAllWeights(double weight)
+void FullConnNetwork::SetAllWeights(double weight)
 {
 	inLayer.InitAllWeights(weight);
 	outLayer.InitAllWeights(weight);
@@ -71,9 +73,7 @@ void BackPropaNetwork::SetAllWeights(double weight)
 	}
 }
 
-// Modified 2023-2-20
-
-void BackPropaNetwork::PushDataDouble(double* data)
+void FullConnNetwork::PushDataDouble(double* data)
 {
 	for (int i = 0; i < inNeuronCount; i++)
 	{
@@ -81,9 +81,7 @@ void BackPropaNetwork::PushDataDouble(double* data)
 	}
 }
 
-// Added 2023-2-20
-
-void BackPropaNetwork::PushDataFloat(float *data)
+void FullConnNetwork::PushDataFloat(float *data)
 {
 	for (int i = 0; i < inNeuronCount; i++)
 	{
@@ -91,7 +89,7 @@ void BackPropaNetwork::PushDataFloat(float *data)
 	}
 }
 
-void BackPropaNetwork::ForwardTransmitLayer(NeuronLayer& obj, NeuronLayer& prev) 
+void FullConnNetwork::ForwardTransmitLayer(NeuronLayer& obj, NeuronLayer& prev) 
 {
 	for (int i = 0; i < obj.Count(); i++) 
 	{
@@ -107,7 +105,8 @@ void BackPropaNetwork::ForwardTransmitLayer(NeuronLayer& obj, NeuronLayer& prev)
 	}
 }
 
-void BackPropaNetwork::ForwardTransmit()
+
+void FullConnNetwork::ForwardTransmit()
 {
 	for (int i = 0; i < hiddenLayerCount; i++)
 	{
@@ -132,7 +131,7 @@ void BackPropaNetwork::ForwardTransmit()
 	SoftMax(outLayer);
 }
 
-void BackPropaNetwork::BackwardTransmitLayer(NeuronLayer& obj, NeuronLayer& last)
+void FullConnNetwork::BackwardTransmitLayer(NeuronLayer& obj, NeuronLayer& last)
 {
 	for (int i = 0; i < obj.Count(); i++)
 	{
@@ -145,7 +144,7 @@ void BackPropaNetwork::BackwardTransmitLayer(NeuronLayer& obj, NeuronLayer& last
 	}
 }
 
-void BackPropaNetwork::BackwardTransmit()
+void FullConnNetwork::BackwardTransmit()
 {
 	SoftMaxGetError(outLayer, targetData);
 
@@ -155,7 +154,7 @@ void BackPropaNetwork::BackwardTransmit()
 	}
 }
 
-void BackPropaNetwork::UpdateLayerWeights(NeuronLayer& layer, NeuronLayer& lastLayer)
+void FullConnNetwork::UpdateLayerWeights(NeuronLayer& layer, NeuronLayer& lastLayer)
 {
 	for (int i = 0; i < layer.Count(); i++)
 	{
@@ -170,7 +169,7 @@ void BackPropaNetwork::UpdateLayerWeights(NeuronLayer& layer, NeuronLayer& lastL
 	}
 }
 
-void BackPropaNetwork::UpdateWeights()
+void FullConnNetwork::UpdateWeights()
 {
 	UpdateLayerWeights(outLayer, hiddenLayerList[hiddenLayerCount - 1]); // update outlayer
 
@@ -180,7 +179,7 @@ void BackPropaNetwork::UpdateWeights()
 	}
 }
 
-int BackPropaNetwork::FindLargestOutput()
+int FullConnNetwork::FindLargestOutput()
 {
 	double biggest = outLayer[0].value;
 	int biggestNeuron = 0;
@@ -197,27 +196,30 @@ int BackPropaNetwork::FindLargestOutput()
 	return biggestNeuron;
 }
 
-int BackPropaNetwork::GetResultDouble(double* data)
+
+int FullConnNetwork::GetResultDouble(double* data)
 {
 	PushDataDouble(data);
 	ForwardTransmit();
 	return FindLargestOutput();
 }
 
-// Added 2023-2-20
-int BackPropaNetwork::GetResultFloat(float* data)
+
+int FullConnNetwork::GetResultFloat(float* data)
 {
 	PushDataFloat(data);
 	ForwardTransmit();
 	return FindLargestOutput();
 }
 
-int BackPropaNetwork::GetResultNetworkData(NetworkData& data)
+
+int FullConnNetwork::GetResultNetworkData(NetworkData& data)
 {
 	return GetResultFloat(data.data);
 }
 
-double BackPropaNetwork::GetAccuracy(NetworkDataSet& set)
+
+double FullConnNetwork::GetAccuracy(NetworkDataSet& set)
 {
 	int correctCount = 0;
 
@@ -233,9 +235,29 @@ double BackPropaNetwork::GetAccuracy(NetworkDataSet& set)
 	return (double)correctCount / (double)set.Count();
 }
 
-// NOTE: 2023-2-20 Fixed wrong targetData generation process
 
-void BackPropaNetwork::Train(NetworkData& data, int maxIterCount, double threshold)
+double FullConnNetwork::GetAccuracyCallbackFloat(NetworkDataSet& set, float* progressVariable)
+{
+	int correctCount = 0, doneCount = 0;
+
+	for (auto& data : set.dataSet)
+	{
+		int label_out = GetResultNetworkData(*data);
+		if (label_out == data->label)
+		{
+			correctCount++;
+		}
+
+		doneCount++;
+
+		*progressVariable = (float)doneCount / (float)set.Count();
+	}
+
+	return (double)correctCount / (double)set.Count();
+}
+
+
+void FullConnNetwork::Train(NetworkData& data, int maxIterCount, double threshold)
 {
 	PushDataFloat(data.data);
 
@@ -263,7 +285,7 @@ void ClearNeuron(Network::Neuron* neuron)
 		free(neuron->weights);
 }
 
-void BackPropaNetwork::Destroy()
+void FullConnNetwork::Destroy()
 {
 	// Clear neuron data
 	inLayer.neurons.clear();

@@ -155,6 +155,9 @@
     <None Include="web\draw.html">
       <Filter>Web</Filter>
     </None>
+    <None Include="web\progress_display.js">
+      <Filter>Web</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Font Include="web\HarmonySans.ttf">

@@ -13,13 +13,6 @@
 
 namespace Network
 {
-	/* 
-	CHANGE LOG:
-		
-		2023-2-20:
-			CHANGE data storing type from double to float; cut down memory space needed
-			CHANGE NetworkData(double*,int,int) to NetworkData(); move initialization function to NetworkDataParser
-	*/
 	struct NetworkData
 	{
 	public:
@@ -33,9 +26,9 @@ namespace Network
 	class NetworkDataSet
 	{
 	public:
-		std::vector<NetworkData*> dataSet;
-		int dataWidth, dataHeight;
-		std::string name;
+		std::vector<NetworkData*> dataSet; // Stores all pointers pointing to the NetworkData in the set
+		int dataWidth, dataHeight; // Width and height of the data image
+		std::string name; // Name for the set
 
 		Network::Algorithm::NormalizationMode mode;
 
@@ -44,6 +37,8 @@ namespace Network
 		void AddData(NetworkData* data);
 		NetworkData& operator[](int index);
 		void Destroy(); // clear all data in dataSet
+		void Shuffle(); // shuffle all the data
+		void FlipXY();
 	};
 }
 

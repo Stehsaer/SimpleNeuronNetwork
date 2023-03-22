@@ -3,11 +3,13 @@
 
 #include "NetworkAlgorithm.h"
 
+#include <algorithm>
+#include <random>
+
 using namespace std::filesystem;
 
 using namespace Network;
 
-// Modified 2023-2-20
 NetworkData::NetworkData()
 {
 	this->data = nullptr;
@@ -19,14 +21,14 @@ void NetworkData::DrawContentDebug(int width, Algorithm::NormalizationMode mode)
 {
 	const std::string chars[] = { "  ", "██" };
 
-	printf("Content of data: (label %d)", label);
+	printf("\nContent of data: (label %d)\n", label);
 
 	switch (mode)
 	{
 	case Algorithm::ZeroToOne:
 		for (int i = 0; i < dataSize; i++)
 		{
-			printf(chars[int(floor(data[i] * 2.0))].c_str()); // print string into console
+			printf(data[i] > 0.2? chars[1].c_str() : chars[0].c_str()); // print string into console
 			
 			if (i % width == width - 1)
 			{
@@ -38,7 +40,7 @@ void NetworkData::DrawContentDebug(int width, Algorithm::NormalizationMode mode)
 	case Algorithm::MinusOneToOne:
 		for (int i = 0; i < dataSize; i++)
 		{
-			printf(chars[int(floor(data[i] + 1.0))].c_str()); // print string into console
+			printf(data[i] > -0.6 ? chars[1].c_str() : chars[0].c_str()); // print string into console
 			
 			if (i % width == width - 1)
 			{
@@ -50,7 +52,7 @@ void NetworkData::DrawContentDebug(int width, Algorithm::NormalizationMode mode)
 	case Algorithm::NoNormalization:
 		for (int i = 0; i < dataSize; i++)
 		{
-			printf(chars[int(floor(data[i] / 128.0))].c_str()); // print string into console
+			printf(data[i] > 20 ? chars[1].c_str() : chars[0].c_str()); // print string into console
 			
 			if (i % width == width - 1)
 			{
@@ -87,3 +89,26 @@ NetworkData& NetworkDataSet::operator[](int index)
 	return *dataSet[index];
 }
 
+void NetworkDataSet::Shuffle()
+{
+	auto rng = std::default_random_engine{}; // random generator
+	std::shuffle(dataSet.begin(), dataSet.end(), rng);
+}
+
+// Flip XY for every image. Used for converting column-wise to row-wise
+void NetworkDataSet::FlipXY()
+{
+	for (auto data : dataSet)
+	{
+		float* result = new float[dataWidth * dataHeight]; // space to store flip result
+
+		for(int x = 0; x < dataWidth; x++)
+			for (int y = 0; y < dataHeight; y++)
+			{
+				result[y * dataWidth + x] = data->data[x * dataHeight + y];
+			}
+
+		delete[] data->data; // delete the data before flip
+		data->data = result;
+	}
+}

@@ -6,6 +6,7 @@
 #include <json/json.h>
 #include <filesystem>
 #include <thread>
+#include <chrono>
 
 using namespace API;
 namespace fs = std::filesystem;
@@ -20,7 +21,12 @@ Json::Value GetStatusJson()
 	statusValue["progress"] = serverProgress;
 	statusValue["success"] = progressSuccess;
 	statusValue["max_dataset_num"] = MAX_DATASET_COUNT;
-	statusValue["current_task"] = (int)server_task;
+	statusValue["current_task"] = (int)serverCurrentTask;
+
+	/*if (serverCurrentTask == serverTask::TrainModel)
+	{
+
+	}*/
 
 	// datasets
 	int index = 0;
@@ -102,6 +108,19 @@ void Query::GetModelList(const HttpRequestPtr& req, std::function<void(const Htt
 	callback(response);
 }
 
+void LoadDatasetHelper(std::string image, std::string label, std::string name, int slot, bool flip)
+{
+	server_status = serverStatus::Query;
+	serverCurrentTask = serverTask::ReadDataset;
+	serverProgress = 0.0f;
+	serverProgressDisplay = "";
+
+	std::cout << std::format("Load Dataset: image={}; label={}; slot={}; name={}", image, label, slot, name) << std::endl;
+
+	std::thread thr(LoadDatasetWork, image, label, slot, name, flip);
+	thr.detach();
+}
+
 void Command::LoadDataset(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& callback, std::string image, std::string label, std::string name, int slot)
 {
 	auto response = HttpResponse::newHttpResponse();
@@ -115,15 +134,27 @@ void Command::LoadDataset(const HttpRequestPtr& req, std::function<void(const Ht
 	}
 	else
 	{
-		server_status = serverStatus::Query;
-		server_task = serverTask::ReadDataset;
-		serverProgress = 0.0f;
-		serverProgressDisplay = "";
+		LoadDatasetHelper(image, label, name, slot, false);
 
-		std::cout << std::format("Load Dataset: image={}; label={}; slot={}; name={}", image, label, slot, name) << std::endl;
+		response->setStatusCode(k200OK);
+		callback(response);
+	}
+}
 
-		std::thread thr(LoadDatasetWork, image, label, slot, name);
-		thr.detach();
+void Command::LoadDatasetFlipped(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& callback, std::string image, std::string label, std::string name, int slot)
+{
+	auto response = HttpResponse::newHttpResponse();
+
+	if (server_status != serverStatus::Idle)
+	{
+		response->setStatusCode(k403Forbidden);
+		callback(response);
+
+		return;
+	}
+	else
+	{
+		LoadDatasetHelper(image, label, name, slot, true);
 
 		response->setStatusCode(k200OK);
 		callback(response);
@@ -165,7 +196,7 @@ void Command::ClearDatasetSlot(const HttpRequestPtr& req, std::function<void(con
 	else
 	{
 		server_status = serverStatus::Query;
-		server_task = serverTask::ReadDataset;
+		serverCurrentTask = serverTask::ReadDataset;
 		serverProgress = 0.0f;
 		serverProgressDisplay = "";
 
@@ -193,7 +224,7 @@ void Command::CreateModel(const HttpRequestPtr& req, std::function<void(const Ht
 	else
 	{
 		server_status = serverStatus::Query;
-		server_task = serverTask::ReadModel;
+		serverCurrentTask = serverTask::ReadModel;
 		serverProgress = 0.0f;
 		serverProgressDisplay = "";
 
@@ -207,7 +238,7 @@ void Command::CreateModel(const HttpRequestPtr& req, std::function<void(const Ht
 	}
 }
 
-void Command::TrainModel(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& callback, int slot, double learningRate, int maxIter, double threshold)
+void Command::TrainModel(const HttpRequestPtr& req, std::function<void(const HttpResponsePtr&)>&& callback, int slot, double learningRate, int maxIter, double threshold, int verifySlot)
 {
 	auto response = HttpResponse::newHttpResponse();
 
@@ -221,13 +252,13 @@ void Command::TrainModel(const HttpRequestPtr& req, std::function<void(const Htt
 	else
 	{
 		server_status = serverStatus::Query;
-		server_task = serverTask::TrainModel;
+		serverCurrentTask = serverTask::TrainModel;
 		serverProgress = 0.0f;
 		serverProgressDisplay = "";
 
-		std::cout << std::format("Training Model: slot={}, maxIter={}, learningRate={}, threshold={}", slot, maxIter, learningRate, threshold ) << std::endl;
+		std::cout << std::format("Training Model: slot={}, maxIter={}, learningRate={}, threshold={}", slot, maxIter, learningRate, threshold) << std::endl;
 
-		std::thread thr(TrainModelWork, slot, maxIter, learningRate, threshold);
+		std::thread thr(TrainModelWork, slot, maxIter, learningRate, threshold, verifySlot);
 		thr.detach();
 
 		response->setStatusCode(k200OK);
@@ -245,6 +276,8 @@ void Query::Recognize(const HttpRequestPtr& req, std::function<void(const HttpRe
 		{
 			throw std::invalid_argument("No network loaded!");
 		}
+
+		auto start = std::chrono::steady_clock::now();
 
 		std::string body = std::string(req->getBody());
 
@@ -273,12 +306,18 @@ void Query::Recognize(const HttpRequestPtr& req, std::function<void(const HttpRe
 
 		network->ForwardTransmit(); // run network
 
+		auto stop = std::chrono::steady_clock::now();
+
+		auto elapsed = stop - start;
+
 		Json::Value outValue;
 
 		for (int i = 0; i < network->outNeuronCount; i++)
 		{
-			outValue.append(Json::Value(network->outLayer[i].value));
+			outValue["result"].append(Json::Value(network->outLayer[i].value));
 		}
+
+		outValue["time"] = (int)elapsed.count();
 
 		auto response = HttpResponse::newHttpJsonResponse(outValue);
 		callback(response);
@@ -315,7 +354,7 @@ void Command::SaveModel(const HttpRequestPtr& req, std::function<void(const Http
 	else
 	{
 		server_status = serverStatus::Query;
-		server_task = serverTask::TrainModel;
+		serverCurrentTask = serverTask::TrainModel;
 		serverProgress = 0.0f;
 		serverProgressDisplay = "";
 
@@ -343,7 +382,7 @@ void Command::LoadModel(const HttpRequestPtr& req, std::function<void(const Http
 	else
 	{
 		server_status = serverStatus::Query;
-		server_task = serverTask::TrainModel;
+		serverCurrentTask = serverTask::TrainModel;
 		serverProgress = 0.0f;
 		serverProgressDisplay = "";
 
