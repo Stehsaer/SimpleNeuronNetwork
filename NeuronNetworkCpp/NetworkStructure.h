@@ -30,7 +30,7 @@ namespace Network
 
 		int Count(); // get count of neurons in this layer
 		void InitAllWeights(double weight);
-		void RandomizeAllWeights(double min, double max);
+		void RandomizeWeightAndBias(double min, double max);
 		Neuron& operator[](int index);
 	};
 }

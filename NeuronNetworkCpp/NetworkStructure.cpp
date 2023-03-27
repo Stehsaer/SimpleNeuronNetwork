@@ -64,7 +64,7 @@ Neuron& NeuronLayer::operator[](int index)
 	return neurons[index];
 }
 
-void NeuronLayer::RandomizeAllWeights(double min, double max)
+void NeuronLayer::RandomizeWeightAndBias(double min, double max)
 {
 	std::mt19937 rnd(std::random_device{}());
 	std::uniform_real_distribution<double> dist(min, max);
@@ -76,4 +76,6 @@ void NeuronLayer::RandomizeAllWeights(double min, double max)
 			neuron.weights[i] = dist(rnd);
 		}
 	}
+
+	bias = dist(rnd);
 }

@@ -54,11 +54,11 @@ double FullConnNetwork::GetLoss()
 
 void FullConnNetwork::RandomizeAllWeights(double min, double max)
 {
-	outLayer.RandomizeAllWeights(min, max);
+	outLayer.RandomizeWeightAndBias(min, max);
 
 	for (auto& layer : hiddenLayerList)
 	{
-		layer.RandomizeAllWeights(min, max);
+		layer.RandomizeWeightAndBias(min, max);
 	}
 }
 
