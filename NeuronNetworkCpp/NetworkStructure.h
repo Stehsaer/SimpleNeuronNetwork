@@ -23,7 +23,7 @@ namespace Network
 		std::vector<Neuron> neurons;
 		int prevCount; // count of neurons of previous layer
 
-		double response, bias;
+		double bias;
 
 		NeuronLayer(int neuronCount, int prevCount);
 		NeuronLayer();

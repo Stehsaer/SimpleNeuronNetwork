@@ -197,6 +197,7 @@
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="FileHelper.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MainNetworkInstance.cpp" />
     <ClCompile Include="NetworkAlgorithm.cpp" />
@@ -206,9 +207,10 @@
     <ClCompile Include="NetworkStructure.cpp" />
     <ClCompile Include="PageProvider.cpp" />
     <ClCompile Include="API.cpp" />
+    <ClCompile Include="ProgressTimer.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Helper.h" />
+    <ClInclude Include="FileHelper.h" />
     <ClInclude Include="MainNetworkInstance.h" />
     <ClInclude Include="Output.h" />
     <ClInclude Include="Network.h" />
@@ -219,6 +221,8 @@
     <ClInclude Include="NetworkStructure.h" />
     <ClInclude Include="PageProvider.h" />
     <ClInclude Include="API.h" />
+    <ClInclude Include="ProcessState.h" />
+    <ClInclude Include="ProgressTimer.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="cpp.hint" />

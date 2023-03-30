@@ -27,8 +27,20 @@ int port = 80;
 
 using namespace drogon;
 
+//#define TEST_CODE
+
+#ifdef TEST_CODE
+
+#endif
+
 int main()
 {
+
+#ifdef TEST_CODE
+
+	return -1;
+#endif
+
 	InitPageProvider();
 
 	printf("Server starting. Parameters: port=%d\n", port);

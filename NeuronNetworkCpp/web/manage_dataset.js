@@ -168,11 +168,18 @@ function LoadDataset() {
             showPopup("Network Error", `Network error, try again later.<br/>Message: ${statusText}`);
         }
 
-        var requestStr = `/api/command/load_dataset?image=${image_name}&label=${label_name}&name=${name}&slot=${slot}`;
+        var requestStr;
+
         if ($("#flip-checkbox").prop("checked")) {
-            requestStr += "&flip";
+            requestStr = `/api/command/load_dataset_flip?image=${image_name}&label=${label_name}&name=${name}&slot=${slot}`;
+        }
+        else {
+            requestStr = `/api/command/load_dataset?image=${image_name}&label=${label_name}&name=${name}&slot=${slot}`;
         }
 
+         
+        console.log(requestStr);
+        
         request.open("POST", requestStr);
         request.send(null);
 

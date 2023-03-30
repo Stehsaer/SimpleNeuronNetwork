@@ -13,7 +13,7 @@ FullConnNetwork::FullConnNetwork(int inNeuronCount, int outNeuronCount, int hidd
 {
 	if (inNeuronCount <= 0 || outNeuronCount <= 0 || hiddenNeuronCount <= 0 || hiddenLayerCount <= 0 || learningRate < 0.0)
 	{
-		throw "Invalid input.";
+		throw std::exception("Invalid Parameters");
 	}
 
 	// Initialize parameters
@@ -38,6 +38,33 @@ FullConnNetwork::FullConnNetwork(int inNeuronCount, int outNeuronCount, int hidd
 	{
 		hiddenLayerList.push_back(NeuronLayer(hiddenNeuronCount, i == 0 ? inNeuronCount : hiddenNeuronCount));
 	}
+}
+
+FullConnNetwork::FullConnNetwork(int inNeuronCount, NeuronLayer outLayer, int hiddenNeuronCount, int hiddenLayerCount, ActivateFunctionType activateFunc, double learningRate)
+{
+	if (inNeuronCount <= 0 || outLayer.Count() == 0)
+	{
+		throw std::exception("Invalid Parameters");
+	}
+
+	this->inNeuronCount = inNeuronCount;
+	outNeuronCount = outLayer.Count();
+
+	this->hiddenNeuronCount = hiddenNeuronCount;
+	this->hiddenLayerCount = hiddenLayerCount;
+
+	ActivateFunc = activateFunc;
+	this->learningRate = learningRate;
+
+	this->loss = 0.0;
+	this->targetData = new double[outNeuronCount];
+
+	ForwardActive = forwardFuncList[(int)ActivateFunc];
+	BackwardActive = backwardFuncList[(int)ActivateFunc];
+
+	inLayer = NeuronLayer(inNeuronCount, 0);
+
+	this->outLayer = outLayer;
 }
 
 double FullConnNetwork::GetLoss()

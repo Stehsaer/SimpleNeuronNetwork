@@ -4,19 +4,12 @@
 #define _NETWORK_DATA_PARSER_H_
 
 #include<string>
-#include<filesystem>
 #include"NetworkFramework.h"
+
+#include "ProcessState.h"
 
 namespace Network
 {
-	struct ProcessState // A struct to indicate success or not
-	{
-		std::string msg;
-		bool success;
-
-		ProcessState(bool success, std::string msg = "") : msg(msg), success(success) {}
-	};
-
 	class NetworkDataParser
 	{
 	public:
@@ -34,6 +27,9 @@ namespace Network
 		static ProcessState ReadMNISTData(NetworkDataSet* dataSet, std::string dataPath, std::string labelPath, Network::Algorithm::NormalizationMode mode);
 		static ProcessState SaveNetworkData(Network::Framework::FullConnNetwork* network, std::string path);
 		static ProcessState ReadNetworkData(Network::Framework::FullConnNetwork** network, std::string path);
+
+		static ProcessState SaveNetworkDataJSON(Network::Framework::FullConnNetwork* network, std::string path);
+		static ProcessState ReadNetworkDataJSON(Network::Framework::FullConnNetwork** network, std::string path);
 	};
 }
 

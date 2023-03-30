@@ -8,6 +8,7 @@ Function: Contains main network objects needed for main thread
 #define _NETWORK_INSTANCE_H_
 
 #include "Network.h"
+#include "ProcessState.h"
 
 #include <string>
 #include <vector>

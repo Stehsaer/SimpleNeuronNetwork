@@ -46,7 +46,7 @@ void LoadDatasetWork(std::string image, std::string label, int slot, std::string
 
 	clock_t start = clock();
 
-	Network::ProcessState result = Network::NetworkDataParser::ReadMNISTData(&datasets[slot], datasetPath + image, datasetPath + label, Network::Algorithm::NormalizationMode::ZeroToOne);
+	ProcessState result = Network::NetworkDataParser::ReadMNISTData(&datasets[slot], datasetPath + image, datasetPath + label, Network::Algorithm::NormalizationMode::ZeroToOne);
 
 	if (flip)
 	{
@@ -279,7 +279,10 @@ void LoadModelWork(std::string name)
 		if (network) network->Destroy();
 
 		// suffix needed
-		Network::ProcessState result = Network::NetworkDataParser::ReadNetworkData(&network, modelPath + name);
+		//ProcessState result = Network::NetworkDataParser::ReadNetworkData(&network, modelPath + name);
+
+		// use new json format data instead
+		ProcessState result = Network::NetworkDataParser::ReadNetworkDataJSON(&network, modelPath + name);
 
 		clock_t elapsedTime = clock() - start;
 
@@ -329,7 +332,10 @@ void SaveModelWork(std::string name)
 			throw std::invalid_argument("Network Instance is empty!");
 		}
 
-		Network::ProcessState result = Network::NetworkDataParser::SaveNetworkData(network, modelPath + name + MODEL_SUFFIX);
+		//ProcessState result = Network::NetworkDataParser::SaveNetworkData(network, modelPath + name + MODEL_SUFFIX);
+
+		// use new json format data instead
+		ProcessState result = Network::NetworkDataParser::SaveNetworkDataJSON(network, modelPath + name + MODEL_SUFFIX);
 
 		clock_t elapsedTime = clock() - start;
 

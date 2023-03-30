@@ -27,7 +27,6 @@ void Neuron::InitWeights(double val)
 NeuronLayer::NeuronLayer(int neuronCount, int prevCount)
 {
 	// initialize parameters
-	response = 0.0;
 	bias = 0.0;
 	this->prevCount = prevCount;
 
@@ -41,7 +40,6 @@ NeuronLayer::NeuronLayer(int neuronCount, int prevCount)
 NeuronLayer::NeuronLayer()
 {
 	// initialize parameters
-	response = 0.0;
 	bias = 0.0;
 	prevCount = 0;
 }

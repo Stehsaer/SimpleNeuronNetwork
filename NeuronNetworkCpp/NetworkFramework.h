@@ -38,7 +38,16 @@ namespace Network
 			/// <param name="hiddenLayerCount">Count of hidden layer</param>
 			/// <param name="ActivateFunc">Activate Function</param>
 			/// <param name="learningRate">Learning Rate</param>
-			FullConnNetwork(int inNeuronCount, int outNeuronCount, int hiddenNeuronCount, int hiddenLayerCount, ActivateFunctionType ActivateFunc, double learningRate);
+			FullConnNetwork(int inNeuronCount, int outNeuronCount, int hiddenNeuronCount, int hiddenLayerCount, ActivateFunctionType activateFunc, double learningRate = 0.0);
+
+			/// <summary>
+			/// Initialize a full-connected-network without full parameters. Used for loading an existing model from file.
+			/// </summary>
+			/// <param name="inNeuronCount">Neuron count of in layer</param>
+			/// <param name="outLayer">outLayer object</param>
+			/// <param name="activateFunc">Activate Function</param>
+			/// <param name="learningRate">Learning Rate</param>
+			FullConnNetwork(int inNeuronCount, NeuronLayer outLayer, int hiddenNeuronCount, int hiddenLayerCount, ActivateFunctionType activateFunc, double learningRate = 0.0);
 
 			/// <summary>
 			/// Fetch loss value and store it to loss(double) variable

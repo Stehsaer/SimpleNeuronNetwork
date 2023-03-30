@@ -115,7 +115,7 @@ void LoadDatasetHelper(std::string image, std::string label, std::string name, i
 	serverProgress = 0.0f;
 	serverProgressDisplay = "";
 
-	std::cout << std::format("Load Dataset: image={}; label={}; slot={}; name={}", image, label, slot, name) << std::endl;
+	std::cout << std::format("Load Dataset: image={}; label={}; slot={}; name={}; flip={}", image, label, slot, name, flip) << std::endl;
 
 	std::thread thr(LoadDatasetWork, image, label, slot, name, flip);
 	thr.detach();
@@ -134,6 +134,7 @@ void Command::LoadDataset(const HttpRequestPtr& req, std::function<void(const Ht
 	}
 	else
 	{
+		std::cout << true;
 		LoadDatasetHelper(image, label, name, slot, false);
 
 		response->setStatusCode(k200OK);
@@ -154,6 +155,7 @@ void Command::LoadDatasetFlipped(const HttpRequestPtr& req, std::function<void(c
 	}
 	else
 	{
+		std::cout << false;
 		LoadDatasetHelper(image, label, name, slot, true);
 
 		response->setStatusCode(k200OK);

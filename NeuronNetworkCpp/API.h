@@ -31,7 +31,7 @@ namespace API
 	public:
 		METHOD_LIST_BEGIN
 			METHOD_ADD(Command::LoadDataset, "/load_dataset?image={image}&label={label}&name={name}&slot={slot}", Post);
-		METHOD_ADD(Command::LoadDatasetFlipped, "/load_dataset?image={image}&label={label}&name={name}&slot={slot}&flip", Post);
+		METHOD_ADD(Command::LoadDatasetFlipped, "/load_dataset_flip?image={image}&label={label}&name={name}&slot={slot}", Post);
 		METHOD_ADD(Command::ClearStatus, "/clear_status", Post);
 		METHOD_ADD(Command::ClearDatasetSlot, "/clear_slot?slot={}", Post);
 		METHOD_ADD(Command::CreateModel, "/create_model?in={}&out={}&layer={}&count={}&func={}", Post);

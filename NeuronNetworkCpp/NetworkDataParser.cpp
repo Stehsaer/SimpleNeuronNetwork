@@ -1,11 +1,12 @@
 #include "NetworkDataParser.h"
-#include "Message.h"
-#include "Output.h"
+#include "ProgressTimer.h"
+#include "FileHelper.h"
 
-#define _FILE_OP_SAFE_
+#include <format>
+#include <json/json.h>
 
-using namespace std::filesystem;
 using namespace Network;
+using FCNetwork = Network::Framework::FullConnNetwork;
 
 /// <summary>
 /// Tell if the computer runs on a little-endian system
@@ -92,57 +93,23 @@ int GetInt32(unsigned char* data, int offset)
 
 ProcessState NetworkDataParser::ReadMNISTData(NetworkDataSet* dataSet, std::string dataPath, std::string labelPath, Network::Algorithm::NormalizationMode mode)
 {
-	// check if file is valid
-	if (!is_regular_file(dataPath) || !is_regular_file(labelPath) || !exists(dataPath) || !exists(labelPath))
-	{
-		return false;
-	}
+	// read file
+	File dataFileObj(dataPath);
+	File labelFileObj(labelPath);
 
-	// fetch data from file
-	FILE* dataFileObj;
-	FILE* labelFileObj;
-
-	// open file
-#ifdef _FILE_OP_SAFE_
-	fopen_s(&dataFileObj, dataPath.c_str(), "rb");
-	fopen_s(&labelFileObj, labelPath.c_str(), "rb");
-#else
-	dataFileObj = fopen(dataPath.c_str(), "rb");
-	labelFileObj = fopen(labelPath.c_str(), "rb");
-#endif
-
-	// check if files get opened correctly
-	if (!dataFileObj || !labelFileObj)
-	{
-		return ProcessState(false, "Can't Open File");
-	}
-
-	// read data
 	unsigned char* data, * label;
 
-	uintmax_t dataFileSize = file_size(path(dataPath));
-	uintmax_t labelFileSize = file_size(path(labelPath));
+	uintmax_t dataFileSize;
+	uintmax_t labelFileSize;
+
+	dataFileObj.ReadAllBytes(&data, &dataFileSize);
+	labelFileObj.ReadAllBytes(&label, &labelFileSize);
 
 	// check file size, current limited at 4G;
 	if (dataFileSize > UINT32_MAX || labelFileSize > UINT32_MAX)
 	{
 		return ProcessState(false, "File Too Large");
 	}
-
-	data = new unsigned char[dataFileSize];
-	label = new unsigned char[labelFileSize];
-
-	// not enough memory space
-	if (!label || !data)
-	{
-		return ProcessState(false, "Running Out Of Memory Space");
-	}
-
-	fread(data, sizeof(unsigned char), dataFileSize, dataFileObj);
-	fread(label, sizeof(unsigned char), labelFileSize, labelFileObj);
-
-	fclose(dataFileObj); // close file streams correctly
-	fclose(labelFileObj);
 
 	int dataMagicNumber = GetInt32(data, 0);
 	int labelMagicNumber = GetInt32(label, 0);
@@ -298,7 +265,7 @@ void WriteData_Layer(NeuronLayer* layer, unsigned char** data)
 	*data = ptrNeuron;
 }
 
-ProcessState NetworkDataParser::SaveNetworkData(Network::Framework::FullConnNetwork* network, std::string path)
+ProcessState NetworkDataParser::SaveNetworkData(FCNetwork* network, std::string path)
 {
 	// Calculate required space
 	int lengthRequired = 0;
@@ -327,20 +294,7 @@ ProcessState NetworkDataParser::SaveNetworkData(Network::Framework::FullConnNetw
 	WriteInt32(network->hiddenNeuronCount, data, 0x0c);
 	WriteInt32(network->hiddenLayerCount, data, 0x10);
 
-	for (int i = 0; i < ActivateFunctionCount; i++)
-	{
-		if (forwardFuncList[i] == network->ForwardActive && backwardFuncList[i] == network->BackwardActive)
-		{
-			WriteInt32(i, data, 0x14);
-			break;
-		}
-
-		if (i == ActivateFunctionCount - 1) // activation function not found
-		{
-			delete[] data;
-			throw std::invalid_argument("Activate Function Invalid!");
-		}
-	}
+	WriteInt32((int)network->ActivateFunc, data, 0x14);
 
 	// Actual Data
 	unsigned char* ptr = data + 0x18;
@@ -353,22 +307,13 @@ ProcessState NetworkDataParser::SaveNetworkData(Network::Framework::FullConnNetw
 
 	WriteInt32(EndDataMN, ptr, 0x00);
 
-	FILE* file;
-
-#ifdef _FILE_OP_SAFE_
-	fopen_s(&file, path.c_str(), "wb");
-#else
-	file = fopen(path.c_str(), "wb");
-#endif
-
-	if (!file)
+	File file(path);
+	if (!file.WriteAllBytes(data, lengthRequired))
 	{
 		delete[] data;
+
 		return ProcessState(false, "Can't Write File");
 	}
-
-	fwrite(data, 1, lengthRequired, file);
-	fclose(file);
 
 	// free
 	delete[] data;
@@ -432,34 +377,22 @@ bool ReadNetwork_Layer(unsigned char** data, NeuronLayer* layer)
 	return true;
 }
 
-ProcessState NetworkDataParser::ReadNetworkData(Network::Framework::FullConnNetwork** network, std::string _path)
+ProcessState NetworkDataParser::ReadNetworkData(FCNetwork** network, std::string _path)
 {
-	if (!exists(std::filesystem::path(_path)))
+	unsigned char* data = nullptr;
+	size_t size;
+
+	File file(_path);
+
+	if (!file.Exists())
 	{
 		return ProcessState(false, "No Such File");
 	}
 
-	// fetch file size
-	int filesize = file_size(path(_path));
-
-	// open file
-	FILE* file;
-
-#ifdef _FILE_OP_SAFE_
-	fopen_s(&file, _path.c_str(), "rb");
-#else
-	file = fopen(_path.c_str(), "rb");
-#endif
-
-	if (!file)
+	if (!file.ReadAllBytes(&data, &size))
 	{
-		return ProcessState(false, "No Such File");
+		return ProcessState(false, "File Access failed");
 	}
-
-	unsigned char* data = new unsigned char[filesize];
-
-	fread(data, 1, filesize, file);
-	fclose(file);
 	
 	if (GetInt32(data, 0x00) != MetadataMN)
 	{
@@ -474,7 +407,7 @@ ProcessState NetworkDataParser::ReadNetworkData(Network::Framework::FullConnNetw
 	int hiddenLayerCount = GetInt32(data, 0x10);
 	int ActivateFunctionCode = GetInt32(data, 0x14);
 
-	Network::Framework::FullConnNetwork * nwk = new Network::Framework::FullConnNetwork(inNeuronCount, outNeuronCount, hiddenNeuronCount, hiddenLayerCount, (ActivateFunctionType)ActivateFunctionCode, DBL_MAX);
+	FCNetwork * nwk = new FCNetwork(inNeuronCount, outNeuronCount, hiddenNeuronCount, hiddenLayerCount, (ActivateFunctionType)ActivateFunctionCode, DBL_MAX);
 
 	unsigned char* ptr = data + 0x18;
 
@@ -518,4 +451,193 @@ ProcessState NetworkDataParser::ReadNetworkData(Network::Framework::FullConnNetw
 	*network = nwk;
 
 	return ProcessState(true);
+}
+
+Json::Value SaveNeuronJSON(Neuron* neuron)
+{
+	Json::Value root;
+
+	root["weight_count"] = neuron->weightCount;
+
+	for (int i = 0; i < neuron->weightCount; i++)
+	{
+		root["weights"].append(neuron->weights[i]);
+	}
+
+	return root;
+}
+
+Json::Value SaveLayerJSON(NeuronLayer* layer)
+{
+	Json::Value root;
+
+	// root parameters
+	root["prev_count"] = layer->prevCount;
+	root["bias"] = layer->bias;
+	root["neuron_count"] = layer->Count();
+
+	// neuron data
+	for (auto& neuron : layer->neurons)
+		root["neurons"].append(SaveNeuronJSON(&neuron));
+
+	return root;
+}
+
+ProcessState NetworkDataParser::SaveNetworkDataJSON(FCNetwork* network, std::string path)
+{
+	try
+	{
+		ProgressTimer timer;
+
+		Json::Value root;
+
+		// Save Root Parameters
+		root["activate_func"] = (int)network->ActivateFunc;
+		root["in_count"] = network->inNeuronCount;
+		root["out_count"] = network->outNeuronCount;
+		root["hidden_neuron_count"] = network->hiddenNeuronCount;
+		root["hidden_layer_count"] = network->hiddenLayerCount;
+
+		// out layer
+		root["out_layer_data"] = SaveLayerJSON(&network->outLayer);
+
+		// hidden layers
+		for (auto& layer : network->hiddenLayerList)
+			root["hidden_layer_data"].append(SaveLayerJSON(&layer));
+
+		// write json to string
+		std::string content = Json::FastWriter().write(root);
+		
+		// write string to file
+		if (!File(path).WriteAllText(content))
+		{
+			// fail
+			return ProcessState(false, "Failed to save network.");
+		}
+
+		return ProcessState(true, "Network Saved.", timer.Count());
+	}
+	catch (std::exception e)
+	{
+		return ProcessState(false, std::format("Unhandled Exception: {}", e.what()));
+	}
+}
+
+void ThrowLogicError(std::string what)
+{
+	throw Json::LogicError(what);
+}
+
+Json::Value GetMember(Json::Value& root, std::string key)
+{
+	if (root.isMember(key))
+		return root[key];
+	else
+		ThrowLogicError("Can't find member: " + key);
+}
+
+Network::Neuron GetNeuronJSON(Json::Value val)
+{
+	int weightCount = GetMember(val, "weight_count").asInt();
+	Json::Value weights = GetMember(val, "weights");
+
+	Network::Neuron neuron(weightCount);
+
+	for (int i = 0; i < weightCount; i++)
+	{
+		neuron.weights[i] = weights[i].asDouble();
+	}
+
+	return neuron;
+}
+
+Network::NeuronLayer GetLayerJSON(Json::Value val)
+{
+	int prevCount = GetMember(val, "prev_count").asInt();
+	int neuronCount = GetMember(val, "neuron_count").asInt();
+	double bias = GetMember(val, "bias").asDouble();
+
+	Network::NeuronLayer layer;
+	
+	layer.prevCount = prevCount;
+	layer.bias = bias;
+
+	if (!GetMember(val, "neurons").isArray())
+	{
+		ThrowLogicError("Can't read key: neurons");
+	}
+
+	if (GetMember(val, "neurons").size() != neuronCount)
+	{
+		ThrowLogicError("Can't parse data: array size mismatch");
+	}
+
+	for (int i = 0; i < neuronCount; i++)
+	{
+		layer.neurons.push_back(GetNeuronJSON(val["neurons"][i]));
+	}
+
+	return layer;
+}
+
+ProcessState NetworkDataParser::ReadNetworkDataJSON(FCNetwork** network, std::string path)
+{
+	try
+	{
+		ProgressTimer timer;
+
+		std::string content;
+
+		// read string from file
+		if (!File(path).ReadAllText(&content))
+		{
+			// fail
+			return ProcessState(false, "Failed to read file!");
+		}
+
+		Json::Value root;
+		
+		// parse raw json string
+		if (!Json::Reader().parse(content, root))
+		{
+			// fail
+			return ProcessState(false, "Not a valid json file!");
+		}
+
+		Network::ActivateFunctionType activateFunc = (Network::ActivateFunctionType)GetMember(root, "activate_func").asInt();
+		int in_count = GetMember(root, "in_count").asInt();
+		int out_count = GetMember(root, "out_count").asInt();
+		int hidden_neuron_count = GetMember(root, "hidden_neuron_count").asInt();
+		int hidden_layer_count = GetMember(root, "hidden_layer_count").asInt();
+
+		if (GetMember(root, "hidden_layer_data").size() != hidden_layer_count)
+		{
+			return ProcessState(false, "Not a valid network!");
+		}
+
+		FCNetwork* net = new FCNetwork(in_count, GetLayerJSON(GetMember(root, "out_layer_data")), hidden_neuron_count, hidden_layer_count, activateFunc);
+
+		for (int i = 0; i < hidden_layer_count; i++)
+		{
+			net->hiddenLayerList.push_back(GetLayerJSON(root["hidden_layer_data"][i]));
+		}
+
+		if (*network)
+		{
+			(**network).Destroy();
+		}
+
+		*network = net;
+
+		return ProcessState(true, "", timer.Count());
+
+	}
+	catch (std::exception e)
+	{
+		return ProcessState(false, std::format("Unhandled Exception: {}", e.what()));
+	}
+	catch (Json::Exception e)
+	{
+		return ProcessState(false, std::format("Can't parse json file. Message: {}", e.what()));
+	}
 }
