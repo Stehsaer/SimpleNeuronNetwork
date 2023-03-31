@@ -1,5 +1,6 @@
 ﻿// network lib
 #include "Network.h"
+#include "ui.h"
 
 // web server
 #include "PageProvider.h"
@@ -41,13 +42,15 @@ int main()
 	return -1;
 #endif
 
-	InitPageProvider();
+	/*InitPageProvider();
 
 	printf("Server starting. Parameters: port=%d\n", port);
 
 	app().addListener("localhost", port);
 	app().setLogLevel(trantor::Logger::LogLevel::kError);
-	app().run();
+	app().run();*/
+
+	UI::MainLoop();
 
 	return 0;
 }

@@ -367,3 +367,4 @@ FodyWeavers.xsd
 *.images
 *.labels
 *.network
+*.ini
