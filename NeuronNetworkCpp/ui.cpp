@@ -6,9 +6,19 @@
 #include "uni_imgui.h"
 
 #include "ImguiUI.h"
+#include "Tasks.h"
 
 namespace UI
 {
+	void Draw();
+
+	// callback for resizing the window
+	void WindowResizeCallback(GLFWwindow* window, int width, int height)
+	{
+		windowWidth = width;
+		windowHeight = height;
+	}
+
 	void InitGL()
 	{
 		// glfw
@@ -31,15 +41,35 @@ namespace UI
 
 		glewInit();
 
-		glfwSwapInterval(windowVsync);
-		glfwSetWindowSizeLimits(window, windowWidth, windowHeight, windowWidth, windowHeight);
+		glfwSetWindowSizeLimits(window, 800, 480, GLFW_DONT_CARE, GLFW_DONT_CARE);
 		glfwMakeContextCurrent(window);
+
+		glfwSetWindowSizeCallback(window, WindowResizeCallback);
 	}
 
 	void InitUI()
 	{
 		InitGL();
 		InitIMGUI();
+
+		namespace inst = Tasks::Instances;
+		//inst::ReadFileList(inst::datasetFiles, inst::datasetPath, { ".images", ".labels" });
+		inst::ReadDirList(inst::datasetDirs, inst::datasetPath);
+		inst::ReadFileList(inst::networkFileList, inst::networkPath, { ".network" });
+	}
+
+	void Draw()
+	{
+		// clear color
+		glClearColor(.0f, .0f, .0f, 1.f);
+		glClear(GL_COLOR_BUFFER_BIT);
+
+		ImGUILoop();
+
+		// swap buffers
+		glfwSwapInterval(windowVsync);
+		glfwSwapBuffers(window);
+		glfwPollEvents();
 	}
 
 	void MainLoop()
@@ -54,15 +84,7 @@ namespace UI
 
 			while (!glfwWindowShouldClose(window))
 			{
-				// clear color
-				glClearColor(.0f, .0f, .0f, 1.f);
-				glClear(GL_COLOR_BUFFER_BIT);
-
-				ImGUILoop();
-
-				// swap buffers
-				glfwSwapBuffers(window);
-				glfwPollEvents();
+				Draw();
 			}
 
 			uiState = UIWindowState::Close;

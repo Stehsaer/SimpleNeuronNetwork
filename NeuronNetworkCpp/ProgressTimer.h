@@ -9,8 +9,9 @@ struct ProgressTimer
 
 	ProgressTimer();
 	void Reset();
-	long Count();
-	long CountAndReset();
+	long long Count();
+	long long CountMs();
+	long long CountAndReset();
 };
 
 #endif

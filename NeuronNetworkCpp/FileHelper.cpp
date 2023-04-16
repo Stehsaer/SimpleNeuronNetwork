@@ -97,3 +97,11 @@ bool File::ReadAllText(std::string* dst)
 	else
 		return false;
 }
+
+FileInfo::FileInfo(std::string path)
+{
+	std::filesystem::path pth(path);
+	fullPath = path;
+	size = file_size(pth);
+	name = pth.filename().string();
+}

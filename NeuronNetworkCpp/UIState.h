@@ -5,6 +5,9 @@
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
+#include <string>
+#include "NotifyUI.h"
+#include "PopupModal.h"
 
 namespace UI
 {
@@ -25,6 +28,11 @@ namespace UI
 	extern bool terminateWindow;
 
 	extern UIWindowState uiState;
+
+	extern Components::NotifyQueue notifyQueue;
+	extern Components::NotifyWindow notifyWindow;
+
+	void AddWarning(std::string msg);
 }
 
 #endif

@@ -126,12 +126,14 @@
       <OmitFramePointers>true</OmitFramePointers>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <DisableSpecificWarnings>26451; 26439; 4251; 4244;</DisableSpecificWarnings>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
     </Link>
     <PostBuildEvent>
       <Command>
@@ -180,12 +182,14 @@
       <OmitFramePointers>true</OmitFramePointers>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <DisableSpecificWarnings>26451; 26439; 4251; 4244;</DisableSpecificWarnings>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
     </Link>
     <PostBuildEvent>
       <Command>
@@ -198,8 +202,9 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="FileHelper.cpp" />
-    <ClCompile Include="HarmonyFont.h" />
     <ClCompile Include="ImguiUI.cpp" />
+    <ClCompile Include="imgui\extensions\imgui_indeterminate_progressbar.cpp" />
+    <ClCompile Include="imgui\extensions\imgui_simple_plot.cpp" />
     <ClCompile Include="imgui\imgui.cpp" />
     <ClCompile Include="imgui\imgui_demo.cpp" />
     <ClCompile Include="imgui\imgui_draw.cpp" />
@@ -208,7 +213,10 @@
     <ClCompile Include="imgui\imgui_stdlib.cpp" />
     <ClCompile Include="imgui\imgui_tables.cpp" />
     <ClCompile Include="imgui\imgui_widgets.cpp" />
-    <ClCompile Include="layout.cpp" />
+    <ClCompile Include="imgui\implot.cpp" />
+    <ClCompile Include="imgui\implot_demo.cpp" />
+    <ClCompile Include="imgui\implot_items.cpp" />
+    <ClCompile Include="Layout.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MainNetworkInstance.cpp" />
     <ClCompile Include="NetworkAlgorithm.cpp" />
@@ -216,17 +224,23 @@
     <ClCompile Include="NetworkDataParser.cpp" />
     <ClCompile Include="NetworkFramework.cpp" />
     <ClCompile Include="NetworkStructure.cpp" />
+    <ClCompile Include="NotifyUI.cpp" />
     <ClCompile Include="PageProvider.cpp" />
     <ClCompile Include="API.cpp" />
+    <ClCompile Include="PopupModal.cpp" />
     <ClCompile Include="ProgressTimer.cpp" />
+    <ClCompile Include="Tasks.cpp" />
     <ClCompile Include="ui.cpp" />
     <ClCompile Include="UIState.cpp" />
+    <ClCompile Include="UIStyle.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="FileHelper.h" />
-    <ClInclude Include="fonts\fa_solid_900.h" />
-    <ClInclude Include="fonts\font_awesome_5.h" />
+    <ClInclude Include="fonts\RemixIconFontDef.h" />
+    <ClInclude Include="FormatHelper.h" />
     <ClInclude Include="ImguiUI.h" />
+    <ClInclude Include="imgui\extensions\imgui_indeterminate_progressbar.h" />
+    <ClInclude Include="imgui\extensions\imgui_simple_plot.h" />
     <ClInclude Include="imgui\imconfig.h" />
     <ClInclude Include="imgui\imgui.h" />
     <ClInclude Include="imgui\imgui_impl_glfw.h" />
@@ -234,10 +248,14 @@
     <ClInclude Include="imgui\imgui_impl_opengl3_loader.h" />
     <ClInclude Include="imgui\imgui_internal.h" />
     <ClInclude Include="imgui\imgui_stdlib.h" />
+    <ClInclude Include="imgui\implot.h" />
+    <ClInclude Include="imgui\implot_internal.h" />
     <ClInclude Include="imgui\imstb_rectpack.h" />
     <ClInclude Include="imgui\imstb_textedit.h" />
     <ClInclude Include="imgui\imstb_truetype.h" />
     <ClInclude Include="MainNetworkInstance.h" />
+    <ClInclude Include="MathHelper.h" />
+    <ClInclude Include="NotifyUI.h" />
     <ClInclude Include="Output.h" />
     <ClInclude Include="Network.h" />
     <ClInclude Include="NetworkAlgorithm.h" />
@@ -247,10 +265,13 @@
     <ClInclude Include="NetworkStructure.h" />
     <ClInclude Include="PageProvider.h" />
     <ClInclude Include="API.h" />
+    <ClInclude Include="PopupModal.h" />
     <ClInclude Include="ProcessState.h" />
     <ClInclude Include="ProgressTimer.h" />
+    <ClInclude Include="Tasks.h" />
     <ClInclude Include="ui.h" />
     <ClInclude Include="UIState.h" />
+    <ClInclude Include="UIStyle.h" />
     <ClInclude Include="uni_imgui.h" />
   </ItemGroup>
   <ItemGroup>

@@ -24,20 +24,11 @@
     <Filter Include="Source Files\Network">
       <UniqueIdentifier>{baf0c04c-d8c8-43bc-8df9-5e6f8b024138}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\main">
-      <UniqueIdentifier>{43b0f2c6-0722-4170-a8ec-8298bc1a4014}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\Server">
       <UniqueIdentifier>{b6b8c319-4553-4821-b1e6-6a671469f570}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\Helper">
       <UniqueIdentifier>{46ca5f59-009c-47ba-99fb-76eb8b541c1a}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Imgui">
-      <UniqueIdentifier>{7ba63e1d-9cbe-41dc-ad50-564e80dd2e79}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Headers\Imgui">
-      <UniqueIdentifier>{f17d0512-d1e8-43bf-844f-193f7f5d93c5}</UniqueIdentifier>
     </Filter>
     <Filter Include="Headers\UI">
       <UniqueIdentifier>{54aac371-498c-4706-a36d-7f03e15f8e95}</UniqueIdentifier>
@@ -47,6 +38,24 @@
     </Filter>
     <Filter Include="Headers\UI\Fonts">
       <UniqueIdentifier>{410025fb-d70f-48a6-ace7-7149f1034380}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\Imgui">
+      <UniqueIdentifier>{32baf33e-4130-4776-8f61-1191494c0929}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Imgui">
+      <UniqueIdentifier>{f7c04da7-1997-4b37-b897-4afac0e4430e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Imgui\Extensions">
+      <UniqueIdentifier>{c39242de-ba71-4b00-966f-ac2172855e7c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\Imgui\Extensions">
+      <UniqueIdentifier>{d41a82be-d8bb-4402-9a1b-6b362b49e87c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\UI\Helper">
+      <UniqueIdentifier>{dea22bcd-e7f6-449b-ace8-aed15c930bb3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\UI\Helper">
+      <UniqueIdentifier>{6f99a928-17a6-4316-8571-fd3407ed07ec}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -65,23 +74,32 @@
     <ClCompile Include="NetworkDataParser.cpp">
       <Filter>Source Files\Network</Filter>
     </ClCompile>
-    <ClCompile Include="main.cpp">
-      <Filter>Source Files\main</Filter>
-    </ClCompile>
     <ClCompile Include="PageProvider.cpp">
       <Filter>Source Files\Server</Filter>
     </ClCompile>
     <ClCompile Include="API.cpp">
       <Filter>Source Files\Server</Filter>
     </ClCompile>
-    <ClCompile Include="MainNetworkInstance.cpp">
-      <Filter>Source Files\main</Filter>
-    </ClCompile>
     <ClCompile Include="ProgressTimer.cpp">
       <Filter>Source Files\Helper</Filter>
     </ClCompile>
     <ClCompile Include="FileHelper.cpp">
       <Filter>Source Files\Helper</Filter>
+    </ClCompile>
+    <ClCompile Include="ui.cpp">
+      <Filter>Source Files\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="ImguiUI.cpp">
+      <Filter>Source Files\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="UIState.cpp">
+      <Filter>Source Files\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="Layout.cpp">
+      <Filter>Source Files\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="UIStyle.cpp">
+      <Filter>Source Files\UI</Filter>
     </ClCompile>
     <ClCompile Include="imgui\imgui.cpp">
       <Filter>Source Files\Imgui</Filter>
@@ -107,20 +125,35 @@
     <ClCompile Include="imgui\imgui_widgets.cpp">
       <Filter>Source Files\Imgui</Filter>
     </ClCompile>
-    <ClCompile Include="ui.cpp">
-      <Filter>Source Files\UI</Filter>
+    <ClCompile Include="imgui\extensions\imgui_simple_plot.cpp">
+      <Filter>Source Files\Imgui\Extensions</Filter>
     </ClCompile>
-    <ClCompile Include="ImguiUI.cpp">
-      <Filter>Source Files\UI</Filter>
+    <ClCompile Include="imgui\extensions\imgui_indeterminate_progressbar.cpp">
+      <Filter>Source Files\Imgui\Extensions</Filter>
     </ClCompile>
-    <ClCompile Include="UIState.cpp">
-      <Filter>Source Files\UI</Filter>
+    <ClCompile Include="main.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="layout.cpp">
-      <Filter>Source Files\UI</Filter>
+    <ClCompile Include="MainNetworkInstance.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="HarmonyFont.h">
-      <Filter>Headers\UI\Fonts</Filter>
+    <ClCompile Include="Tasks.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="NotifyUI.cpp">
+      <Filter>Source Files\UI\Helper</Filter>
+    </ClCompile>
+    <ClCompile Include="PopupModal.cpp">
+      <Filter>Source Files\UI\Helper</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui\implot_items.cpp">
+      <Filter>Source Files\Imgui\Extensions</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui\implot.cpp">
+      <Filter>Source Files\Imgui\Extensions</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui\implot_demo.cpp">
+      <Filter>Source Files\Imgui\Extensions</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -163,6 +196,24 @@
     <ClInclude Include="FileHelper.h">
       <Filter>Headers\Helper</Filter>
     </ClInclude>
+    <ClInclude Include="ui.h">
+      <Filter>Headers\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="ImguiUI.h">
+      <Filter>Headers\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="UIState.h">
+      <Filter>Headers\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="fonts\RemixIconFontDef.h">
+      <Filter>Headers\UI\Fonts</Filter>
+    </ClInclude>
+    <ClInclude Include="UIStyle.h">
+      <Filter>Headers\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="uni_imgui.h">
+      <Filter>Headers\UI</Filter>
+    </ClInclude>
     <ClInclude Include="imgui\imconfig.h">
       <Filter>Headers\Imgui</Filter>
     </ClInclude>
@@ -173,6 +224,9 @@
       <Filter>Headers\Imgui</Filter>
     </ClInclude>
     <ClInclude Include="imgui\imgui_impl_opengl3.h">
+      <Filter>Headers\Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui\imgui_impl_opengl3_loader.h">
       <Filter>Headers\Imgui</Filter>
     </ClInclude>
     <ClInclude Include="imgui\imgui_internal.h">
@@ -190,26 +244,32 @@
     <ClInclude Include="imgui\imstb_truetype.h">
       <Filter>Headers\Imgui</Filter>
     </ClInclude>
-    <ClInclude Include="imgui\imgui_impl_opengl3_loader.h">
-      <Filter>Headers\Imgui</Filter>
+    <ClInclude Include="imgui\extensions\imgui_simple_plot.h">
+      <Filter>Headers\Imgui\Extensions</Filter>
     </ClInclude>
-    <ClInclude Include="ui.h">
-      <Filter>Headers\UI</Filter>
+    <ClInclude Include="Tasks.h">
+      <Filter>Headers</Filter>
     </ClInclude>
-    <ClInclude Include="ImguiUI.h">
-      <Filter>Headers\UI</Filter>
+    <ClInclude Include="imgui\extensions\imgui_indeterminate_progressbar.h">
+      <Filter>Headers\Imgui\Extensions</Filter>
     </ClInclude>
-    <ClInclude Include="UIState.h">
-      <Filter>Headers\UI</Filter>
+    <ClInclude Include="MathHelper.h">
+      <Filter>Headers\Helper</Filter>
     </ClInclude>
-    <ClInclude Include="uni_imgui.h">
-      <Filter>Headers\Imgui</Filter>
+    <ClInclude Include="NotifyUI.h">
+      <Filter>Headers\UI\Helper</Filter>
     </ClInclude>
-    <ClInclude Include="fonts\fa_solid_900.h">
-      <Filter>Headers\UI\Fonts</Filter>
+    <ClInclude Include="PopupModal.h">
+      <Filter>Headers\UI\Helper</Filter>
     </ClInclude>
-    <ClInclude Include="fonts\font_awesome_5.h">
-      <Filter>Headers\UI\Fonts</Filter>
+    <ClInclude Include="FormatHelper.h">
+      <Filter>Headers\Helper</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui\implot.h">
+      <Filter>Headers\Imgui\Extensions</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui\implot_internal.h">
+      <Filter>Headers\Imgui\Extensions</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

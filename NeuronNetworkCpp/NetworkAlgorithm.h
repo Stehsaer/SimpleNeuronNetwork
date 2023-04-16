@@ -98,6 +98,14 @@ namespace Network
 	&Network::Algorithm::ReLU_D ,
 	&Network::Algorithm::LeakyReLU_D
 	};
+
+	inline const char* functionNameList[] =
+	{
+		"Sigmoid",
+		"Tanh",
+		"ReLU",
+		"LeakyReLU"
+	};
 }
 
 #endif

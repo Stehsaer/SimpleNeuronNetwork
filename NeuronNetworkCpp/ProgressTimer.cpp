@@ -10,14 +10,21 @@ void ProgressTimer::Reset()
 	startTimePoint = std::chrono::steady_clock::now();
 }
 
-long ProgressTimer::Count()
+long long ProgressTimer::Count()
 {
-	return (long)((std::chrono::steady_clock::now() - startTimePoint).count());
+	return (std::chrono::steady_clock::now() - startTimePoint).count();
 }
 
-long ProgressTimer::CountAndReset()
+long long ProgressTimer::CountMs()
 {
-	long temp = Count();
+	long long duration = Count();
+	
+	return duration / 1000000LL;
+}
+
+long long ProgressTimer::CountAndReset()
+{
+	long long temp = Count();
 	Reset();
 	return temp;
 }

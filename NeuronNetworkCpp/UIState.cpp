@@ -10,4 +10,12 @@ namespace UI
 	bool terminateWindow = false;
 
 	UIWindowState uiState = UIWindowState::Unloaded;
+
+	Components::NotifyQueue notifyQueue;
+	Components::NotifyWindow notifyWindow(notifyQueue);
+
+	void AddWarning(std::string msg)
+	{
+		notifyQueue.Queue(Components::Notification(msg, "Error", 0));
+	}
 }

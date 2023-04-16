@@ -632,12 +632,12 @@ ProcessState NetworkDataParser::ReadNetworkDataJSON(FCNetwork** network, std::st
 		return ProcessState(true, "", timer.Count());
 
 	}
-	catch (std::exception e)
-	{
-		return ProcessState(false, std::format("Unhandled Exception: {}", e.what()));
-	}
 	catch (Json::Exception e)
 	{
 		return ProcessState(false, std::format("Can't parse json file. Message: {}", e.what()));
+	}
+	catch (std::exception e)
+	{
+		return ProcessState(false, std::format("Unhandled Exception: {}", e.what()));
 	}
 }
