@@ -11,12 +11,12 @@ Neuron::Neuron(int _weightCount)
 	error = 0.0;
 
 	if (weightCount > 0)
-		weights = new double[weightCount];
+		weights = new float_n[weightCount];
 	else
 		weights = nullptr;
 }
 
-void Neuron::InitWeights(double val)
+void Neuron::InitWeights(float_n val)
 {
 	for (int i = 0; i < weightCount; i++)
 	{
@@ -49,7 +49,7 @@ int NeuronLayer::Count()
 	return neurons.size();
 }
 
-void NeuronLayer::InitAllWeights(double weight)
+void NeuronLayer::InitAllWeights(float_n weight)
 {
 	for (auto& neuron : neurons)
 	{
@@ -62,10 +62,10 @@ Neuron& NeuronLayer::operator[](int index)
 	return neurons[index];
 }
 
-void NeuronLayer::RandomizeWeightAndBias(double min, double max)
+void NeuronLayer::RandomizeWeightAndBias(float_n min, float_n max)
 {
 	std::mt19937 rnd(std::random_device{}());
-	std::uniform_real_distribution<double> dist(min, max);
+	std::uniform_real_distribution<float_n> dist(min, max);
 
 	for (auto& neuron : neurons)
 	{

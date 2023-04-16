@@ -5,16 +5,18 @@
 
 namespace Network
 {
+	typedef float float_n;
+
 	struct Neuron
 	{
 	public:
-		double value, error;
+		float_n value, error;
 
-		double* weights;
+		float_n* weights;
 		int weightCount;
 
 		Neuron(int weightCount);
-		void InitWeights(double val);
+		void InitWeights(float_n val);
 	};
 
 	class NeuronLayer
@@ -23,14 +25,14 @@ namespace Network
 		std::vector<Neuron> neurons;
 		int prevCount; // count of neurons of previous layer
 
-		double bias;
+		float_n bias;
 
 		NeuronLayer(int neuronCount, int prevCount);
 		NeuronLayer();
 
 		int Count(); // get count of neurons in this layer
-		void InitAllWeights(double weight);
-		void RandomizeWeightAndBias(double min, double max);
+		void InitAllWeights(float_n weight);
+		void RandomizeWeightAndBias(float_n min, float_n max);
 		Neuron& operator[](int index);
 	};
 }

@@ -44,6 +44,7 @@ namespace Tasks
 		extern const std::string datasetPath;
 		extern const std::string networkPath;
 
+		extern bool networkOccupied;
 		extern Network::Framework::FullConnNetwork* mainNetwork;
 		extern std::vector<Network::NetworkDataSet*> datasets;
 

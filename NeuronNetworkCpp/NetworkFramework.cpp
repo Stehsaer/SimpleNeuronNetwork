@@ -9,7 +9,9 @@
 using namespace Network::Framework;
 using namespace Network::Algorithm;
 
-FullConnNetwork::FullConnNetwork(int inNeuronCount, int outNeuronCount, int hiddenNeuronCount, int hiddenLayerCount, ActivateFunctionType ActivateFunc, double learningRate)
+typedef Network::float_n float_n;
+
+FullConnNetwork::FullConnNetwork(int inNeuronCount, int outNeuronCount, int hiddenNeuronCount, int hiddenLayerCount, ActivateFunctionType ActivateFunc, float_n learningRate)
 {
 	if (inNeuronCount <= 0 || outNeuronCount <= 0 || hiddenNeuronCount <= 0 || hiddenLayerCount <= 0 || learningRate < 0.0)
 	{
@@ -23,7 +25,7 @@ FullConnNetwork::FullConnNetwork(int inNeuronCount, int outNeuronCount, int hidd
 	this->hiddenLayerCount = hiddenLayerCount;
 	this->learningRate = learningRate;
 	this->loss = 0.0;
-	this->targetData = new double[outNeuronCount];
+	this->targetData = new float_n[outNeuronCount];
 
 	this->ActivateFunc = ActivateFunc;
 
@@ -40,7 +42,7 @@ FullConnNetwork::FullConnNetwork(int inNeuronCount, int outNeuronCount, int hidd
 	}
 }
 
-FullConnNetwork::FullConnNetwork(int inNeuronCount, NeuronLayer outLayer, int hiddenNeuronCount, int hiddenLayerCount, ActivateFunctionType activateFunc, double learningRate)
+FullConnNetwork::FullConnNetwork(int inNeuronCount, NeuronLayer outLayer, int hiddenNeuronCount, int hiddenLayerCount, ActivateFunctionType activateFunc, float_n learningRate)
 {
 	if (inNeuronCount <= 0 || outLayer.Count() == 0)
 	{
@@ -57,7 +59,7 @@ FullConnNetwork::FullConnNetwork(int inNeuronCount, NeuronLayer outLayer, int hi
 	this->learningRate = learningRate;
 
 	this->loss = 0.0;
-	this->targetData = new double[outNeuronCount];
+	this->targetData = new float_n[outNeuronCount];
 
 	ForwardActive = forwardFuncList[(int)ActivateFunc];
 	BackwardActive = backwardFuncList[(int)ActivateFunc];
@@ -67,7 +69,7 @@ FullConnNetwork::FullConnNetwork(int inNeuronCount, NeuronLayer outLayer, int hi
 	this->outLayer = outLayer;
 }
 
-double FullConnNetwork::GetLoss()
+float_n FullConnNetwork::GetLoss()
 {
 	loss = 0.0;
 	
@@ -79,7 +81,7 @@ double FullConnNetwork::GetLoss()
 	return loss;
 }
 
-void FullConnNetwork::RandomizeAllWeights(double min, double max)
+void FullConnNetwork::RandomizeAllWeights(float_n min, float_n max)
 {
 	outLayer.RandomizeWeightAndBias(min, max);
 
@@ -89,7 +91,7 @@ void FullConnNetwork::RandomizeAllWeights(double min, double max)
 	}
 }
 
-void FullConnNetwork::SetAllWeights(double weight)
+void FullConnNetwork::SetAllWeights(float_n weight)
 {
 	inLayer.InitAllWeights(weight);
 	outLayer.InitAllWeights(weight);
@@ -112,7 +114,7 @@ void FullConnNetwork::PushDataFloat(float *data)
 {
 	for (int i = 0; i < inNeuronCount; i++)
 	{
-		inLayer[i].value = (double)data[i];
+		inLayer[i].value = (float_n)data[i];
 	}
 }
 
@@ -128,7 +130,7 @@ void FullConnNetwork::ForwardTransmitLayer(NeuronLayer& obj, NeuronLayer& prev)
 		}
 
 		obj[i].value += obj.bias;
-		obj[i].value = (*ForwardActive)(obj[i].value / (double)obj.prevCount);
+		obj[i].value = (*ForwardActive)(obj[i].value / (float_n)obj.prevCount);
 	}
 }
 
@@ -185,7 +187,7 @@ void FullConnNetwork::UpdateLayerWeights(NeuronLayer& layer, NeuronLayer& lastLa
 {
 	for (int i = 0; i < layer.Count(); i++)
 	{
-		double coeff = learningRate * (*BackwardActive)(layer[i].value) * layer[i].error; // common coeff
+		float_n coeff = learningRate * (*BackwardActive)(layer[i].value) * layer[i].error; // common coeff
 
 		layer.bias += learningRate * (*BackwardActive)(layer.bias) * layer[i].error; // tweak bias
 
@@ -208,7 +210,7 @@ void FullConnNetwork::UpdateWeights()
 
 int FullConnNetwork::FindLargestOutput()
 {
-	double biggest = outLayer[0].value;
+	float_n biggest = outLayer[0].value;
 	int biggestNeuron = 0;
 
 	for (int i = 1; i < outLayer.Count(); i++)
@@ -246,7 +248,7 @@ int FullConnNetwork::GetResultNetworkData(NetworkData& data)
 }
 
 
-double FullConnNetwork::GetAccuracy(NetworkDataSet& set)
+float_n FullConnNetwork::GetAccuracy(NetworkDataSet& set)
 {
 	int correctCount = 0;
 
@@ -259,11 +261,11 @@ double FullConnNetwork::GetAccuracy(NetworkDataSet& set)
 		}
 	}
 
-	return (double)correctCount / (double)set.Count();
+	return (float_n)correctCount / (float_n)set.Count();
 }
 
 
-double FullConnNetwork::GetAccuracyCallbackFloat(NetworkDataSet& set, float* progressVariable)
+float_n FullConnNetwork::GetAccuracyCallbackFloat(NetworkDataSet& set, float* progressVariable)
 {
 	int correctCount = 0, doneCount = 0;
 
@@ -280,11 +282,11 @@ double FullConnNetwork::GetAccuracyCallbackFloat(NetworkDataSet& set, float* pro
 		*progressVariable = (float)doneCount / (float)set.Count();
 	}
 
-	return (double)correctCount / (double)set.Count();
+	return (float_n)correctCount / (float_n)set.Count();
 }
 
 
-void FullConnNetwork::Train(NetworkData& data, int maxIterCount, double threshold)
+void FullConnNetwork::Train(NetworkData& data, int maxIterCount, float_n threshold)
 {
 	PushDataFloat(data.data);
 

@@ -141,9 +141,6 @@ namespace UI
 
 					for (auto& neuron : layer.neurons)
 					{
-						if (!neuron.weights) // if network get destroyed, quit immediately to avoid error
-							break;
-
 						try
 						{
 							if (ImPlot::BeginPlot(GenID("", &neuron).c_str(), ImVec2(120, 120)))
@@ -217,6 +214,9 @@ namespace UI
 					{
 						std::thread thread(Tasks::LoadDataset, Tasks::Instances::datasetDirs[selectedItem], name, loadFlipped);
 						thread.detach();
+
+						name = "";
+						selectedItem = -1;
 					}
 				}
 
@@ -537,6 +537,7 @@ namespace UI
 						if (ImGui::Selectable(str.c_str(), isSelected))
 						{
 							Workload::Datasets::selectedItem = isSelected ? -1 : i;
+							Workload::Datasets::name = str;
 						}
 
 						if (isSelected) ImGui::SetItemDefaultFocus();
@@ -751,18 +752,21 @@ namespace UI
 
 					if (ImGui::TreeNode("View##network_view_node"))
 					{
-						if (Tasks::Instances::mainNetwork)
+						if (Tasks::Instances::mainNetwork && !Tasks::Instances::networkOccupied)
 						{
+							Tasks::Instances::networkOccupied = true; // Occupied the network
+
 							int totalCount = Tasks::Instances::mainNetwork->hiddenLayerCount;
 							for (int i = 0; i < totalCount; i++)
 							{
 								if (ImGui::TreeNode(std::format("Hidden Layer {}", i).c_str()))
 								{
-									if (Tasks::Instances::mainNetwork)
-										Util::ShowHeatmap(Tasks::Instances::mainNetwork->hiddenLayerList[i]);
+									Util::ShowHeatmap(Tasks::Instances::mainNetwork->hiddenLayerList[i]);
 									ImGui::TreePop();
 								}
 							}
+
+							Tasks::Instances::networkOccupied = false;
 						}
 						ImGui::TreePop();
 					}

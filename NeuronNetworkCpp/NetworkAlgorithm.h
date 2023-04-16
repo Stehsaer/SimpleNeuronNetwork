@@ -5,7 +5,7 @@
 
 namespace Network
 {
-	typedef double (*ActivateFunction)(double);
+	typedef float_n(*ActivateFunction)(float_n);
 
 	namespace Algorithm
 	{
@@ -19,42 +19,42 @@ namespace Network
 		/// <summary>
 		/// Sigmoid
 		/// </summary>
-		double Sigmoid(double x);
+		float_n Sigmoid(float_n x);
 
 		/// <summary>
 		/// Derivative of Sigmoid
 		/// </summary>
-		double Sigmoid_D(double x);
+		float_n Sigmoid_D(float_n x);
 
 		/// <summary>
 		/// Shifted Sigmoid
 		/// </summary>
-		double ShiftedSigmoid(double x);
+		float_n ShiftedSigmoid(float_n x);
 
 		/// <summary>
 		/// D: Shifted Sigmoid
 		/// </summary>
-		double ShiftedSigmoid_D(double x);
+		float_n ShiftedSigmoid_D(float_n x);
 
 		/// <summary>
 		/// ReLU
 		/// </summary>
-		double ReLU(double x);
+		float_n ReLU(float_n x);
 
 		/// <summary>
 		/// D: ReLU
 		/// </summary>
-		double ReLU_D(double x);
+		float_n ReLU_D(float_n x);
 
 		/// <summary>
 		/// Leaky ReLU
 		/// </summary>
-		double LeakyReLU(double x);
+		float_n LeakyReLU(float_n x);
 
 		/// <summary>
 		/// D: Leaky ReLU
 		/// </summary>
-		double LeakyReLU_D(double x);
+		float_n LeakyReLU_D(float_n x);
 
 		/// <summary>
 		/// Normalize data in a given data range
@@ -75,7 +75,7 @@ namespace Network
 		/// Softmax
 		/// </summary>
 		/// <param name="target">Target Data used for error calculation</param>
-		void SoftMaxGetError(NeuronLayer& layer, double* target);
+		void SoftMaxGetError(NeuronLayer& layer, float_n* target);
 	}
 
 	enum class ActivateFunctionType:int

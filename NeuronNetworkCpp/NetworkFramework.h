@@ -26,8 +26,8 @@ namespace Network
 			std::vector<NeuronLayer> hiddenLayerList;
 
 			// training parameters
-			double learningRate, loss;
-			double* targetData;
+			float_n learningRate, loss;
+			float_n* targetData;
 
 			/// <summary>
 			/// Initialize a full-connected-network
@@ -38,7 +38,7 @@ namespace Network
 			/// <param name="hiddenLayerCount">Count of hidden layer</param>
 			/// <param name="ActivateFunc">Activate Function</param>
 			/// <param name="learningRate">Learning Rate</param>
-			FullConnNetwork(int inNeuronCount, int outNeuronCount, int hiddenNeuronCount, int hiddenLayerCount, ActivateFunctionType activateFunc, double learningRate = 0.0);
+			FullConnNetwork(int inNeuronCount, int outNeuronCount, int hiddenNeuronCount, int hiddenLayerCount, ActivateFunctionType activateFunc, float_n learningRate = 0.0);
 
 			/// <summary>
 			/// Initialize a full-connected-network without full parameters. Used for loading an existing model from file.
@@ -47,26 +47,26 @@ namespace Network
 			/// <param name="outLayer">outLayer object</param>
 			/// <param name="activateFunc">Activate Function</param>
 			/// <param name="learningRate">Learning Rate</param>
-			FullConnNetwork(int inNeuronCount, NeuronLayer outLayer, int hiddenNeuronCount, int hiddenLayerCount, ActivateFunctionType activateFunc, double learningRate = 0.0);
+			FullConnNetwork(int inNeuronCount, NeuronLayer outLayer, int hiddenNeuronCount, int hiddenLayerCount, ActivateFunctionType activateFunc, float_n learningRate = 0.0);
 
 			/// <summary>
 			/// Fetch loss value and store it to loss(double) variable
 			/// </summary>
 			/// <returns>Loss</returns>
-			double GetLoss();
+			float_n GetLoss();
 
 			/// <summary>
 			/// Randomize all weights in the network in linear fashion
 			/// </summary>
 			/// <param name="min">Min Value</param>
 			/// <param name="max">Max Value</param>
-			void RandomizeAllWeights(double min, double max);
+			void RandomizeAllWeights(float_n min, float_n max);
 
 			/// <summary>
 			/// Set every weight in the network to a value
 			/// </summary>
 			/// <param name="weight">Input value</param>
-			void SetAllWeights(double weight);
+			void SetAllWeights(float_n weight);
 
 			/// <summary>
 			/// Push some data into the in layer
@@ -78,7 +78,7 @@ namespace Network
 			/// Push some data into the in layer
 			/// </summary>
 			/// <param name="data">Pointer for the data</param>
-			void PushDataFloat(float* data);
+			void PushDataFloat(float_n* data);
 
 			/// <summary>
 			/// Execute a full forward transmit
@@ -102,7 +102,7 @@ namespace Network
 			/// <param name="data">NetworkData</param>
 			/// <param name="maxIterCount">Max Iteration Count in this particular run</param>
 			/// <param name="threshold">Threshold when stop iterating</param>
-			void Train(NetworkData& data, int maxIterCount = 3, double threshold = 0.01);
+			void Train(NetworkData& data, int maxIterCount = 3, float_n threshold = 0.01);
 
 			/// <summary>
 			/// Find the index of largest output
@@ -136,7 +136,7 @@ namespace Network
 			/// </summary>
 			/// <param name="set">Verify/Test Dataset</param>
 			/// <returns>Accuracy, 1.0d max.</returns>
-			double GetAccuracy(NetworkDataSet& set);
+			float_n GetAccuracy(NetworkDataSet& set);
 
 			/// <summary>
 			/// Calculate overall accuracy using a verify/test set, but with progress callback
@@ -144,7 +144,7 @@ namespace Network
 			/// <param name="set">Verify/Test Dataset</param>
 			/// <param name="progressVariable">Pointer of the progress value</param>
 			/// <returns>Accuracy from 0.0 to 1.0</returns>
-			double GetAccuracyCallbackFloat(NetworkDataSet& set, float* progressVariable);
+			float_n GetAccuracyCallbackFloat(NetworkDataSet& set, float* progressVariable);
 
 			/// <summary>
 			/// Clear all data in the network and ready to be destroyed

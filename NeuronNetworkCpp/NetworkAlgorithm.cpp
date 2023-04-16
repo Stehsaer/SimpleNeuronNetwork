@@ -3,45 +3,46 @@
 #include<math.h>
 
 using namespace Network::Algorithm;
+typedef Network::float_n float_n;
 
-double Network::Algorithm::Sigmoid(double x)
+float_n Network::Algorithm::Sigmoid(float_n x)
 {
 	return 1.0 / (1.0 + exp(-x));
 }
 
-double Network::Algorithm::Sigmoid_D(double x)
+float_n Network::Algorithm::Sigmoid_D(float_n x)
 {
 	return x * (1.0 - x);
 }
 
-double Network::Algorithm::ShiftedSigmoid(double x)
+float_n Network::Algorithm::ShiftedSigmoid(float_n x)
 {
 	return Sigmoid(x) * 2.0 - 1.0;
 }
 
-double Network::Algorithm::ShiftedSigmoid_D(double x)
+float_n Network::Algorithm::ShiftedSigmoid_D(float_n x)
 {
 	return Sigmoid_D((x + 1.0) / 2.0);
 }
 
-double Network::Algorithm::ReLU(double x)
+float_n Network::Algorithm::ReLU(float_n x)
 {
 	return x > 0.0 ? x : 0.0;
 }
 
-double Network::Algorithm::ReLU_D(double x)
+float_n Network::Algorithm::ReLU_D(float_n x)
 {
 	return x > 0.0 ? 1.0 : 0.0;
 }
 
 #define LEAKY_RELU_CONST 0.01
 
-double Network::Algorithm::LeakyReLU(double x)
+float_n Network::Algorithm::LeakyReLU(float_n x)
 {
 	return x > 0.0 ? x : x * LEAKY_RELU_CONST;
 }
 
-double Network::Algorithm::LeakyReLU_D(double x)
+float_n Network::Algorithm::LeakyReLU_D(float_n x)
 {
 	return x > 0.0 ? 1.0 : LEAKY_RELU_CONST;
 }
@@ -118,7 +119,7 @@ void Network::Algorithm::SoftMax(Network::NeuronLayer& layer)
 	}
 }
 
-void Network::Algorithm::SoftMaxGetError(NeuronLayer& layer, double* target)
+void Network::Algorithm::SoftMaxGetError(NeuronLayer& layer, float_n* target)
 {
 	for (int i = 0; i < layer.Count(); i++)
 	{

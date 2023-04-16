@@ -175,9 +175,6 @@
     <ClInclude Include="Network.h">
       <Filter>Headers\Network Headers</Filter>
     </ClInclude>
-    <ClInclude Include="Output.h">
-      <Filter>Headers\Network Headers</Filter>
-    </ClInclude>
     <ClInclude Include="PageProvider.h">
       <Filter>Headers\Server</Filter>
     </ClInclude>

@@ -59,6 +59,7 @@ namespace Tasks
 		const std::string datasetPath = "resources/datasets/";
 		const std::string networkPath = "resources/models/";
 
+		bool networkOccupied = false;
 		Network::Framework::FullConnNetwork* mainNetwork = NULL;
 		std::vector<Network::NetworkDataSet*> datasets;
 
@@ -180,16 +181,22 @@ namespace Tasks
 
 			if (Instances::mainNetwork)
 			{
-				auto* network = Instances::mainNetwork;
+				while (Instances::networkOccupied);
+
+				Instances::networkOccupied = true;
+
+				Instances::mainNetwork->Destroy();
+				delete Instances::mainNetwork;
+
 				Instances::mainNetwork = NULL;
-				network->Destroy();
-				delete network;
 			}
 
 			Network::ActivateFunctionType funcType = (Network::ActivateFunctionType)func;
 
 			Instances::mainNetwork = new Network::Framework::FullConnNetwork(inNeuronCount, outNeuronCount, hiddenNeuronCount, hiddenLayerCount, funcType);
 			Instances::mainNetwork->RandomizeAllWeights(0.1, 0.9);
+
+			Instances::networkOccupied = false;
 
 			taskProgress.Done(std::format("Network created in {}ms", timer.CountMs()));
 		}
@@ -209,6 +216,10 @@ namespace Tasks
 
 			if (Instances::mainNetwork)
 			{
+				while (Instances::networkOccupied);
+
+				Instances::networkOccupied = true;
+
 				Instances::mainNetwork->Destroy();
 				delete Instances::mainNetwork;
 
@@ -225,6 +236,8 @@ namespace Tasks
 			{
 				throw std::exception(state.msg.c_str());
 			}
+
+			Instances::networkOccupied = false;
 		}
 		catch (std::exception e)
 		{
