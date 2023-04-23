@@ -12,7 +12,7 @@ float serverProgress = 0.0f;
 
 int progressSuccess = -1;
 
-Network::Framework::FullConnNetwork* network = nullptr;
+Network::Connectivity::FullConnNetwork* network = nullptr;
 
 Network::NetworkDataSet datasets[MAX_DATASET_COUNT];
 
@@ -132,7 +132,7 @@ void CreateModelWork(int inNeuronCount, int outNeuronCount, int layerCount, int 
 		forward = Network::forwardFuncList[(int)func];
 		backward = Network::backwardFuncList[(int)func];
 
-		network = new Network::Framework::FullConnNetwork(inNeuronCount, outNeuronCount, layerNeuronCount, layerCount, func, 0.0);
+		network = new Network::Connectivity::FullConnNetwork(inNeuronCount, outNeuronCount, layerNeuronCount, layerCount, func, 0.0);
 		network->RandomizeAllWeights(0.1, 0.9);
 
 		clock_t elapsedTime = clock() - start;
@@ -221,7 +221,7 @@ void TrainModelWork(int slot, int maxIter, double learningRate, double threshold
 				std::cout << serverProgressDisplay << std::endl;
 			}
 
-			network->Train(*(dataset->dataSet[i]), maxIter, threshold);
+			//network->Train(*(dataset->dataSet[i]), maxIter, threshold);
 
 			_ASSERT(!isnan(network->loss));
 		}

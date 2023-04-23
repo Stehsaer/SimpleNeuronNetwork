@@ -224,6 +224,7 @@
     <ClCompile Include="NetworkDataParser.cpp" />
     <ClCompile Include="NetworkFramework.cpp" />
     <ClCompile Include="NetworkStructure.cpp" />
+    <ClCompile Include="NetworkTrain.cpp" />
     <ClCompile Include="NotifyUI.cpp" />
     <ClCompile Include="PageProvider.cpp" />
     <ClCompile Include="API.cpp" />

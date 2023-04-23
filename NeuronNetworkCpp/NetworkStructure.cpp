@@ -24,6 +24,23 @@ void Neuron::InitWeights(float_n val)
 	}
 }
 
+NeuronInstance::NeuronInstance(Neuron* source)
+{
+	this->source = source;
+
+	weights = source->weights;
+	weightCount = source->weightCount;
+
+	value = source->value;
+	error = 0.0;
+}
+
+void NeuronInstance::FeedBack()
+{
+	source->value += value;
+	source->error += error;
+}
+
 NeuronLayer::NeuronLayer(int neuronCount, int prevCount)
 {
 	// initialize parameters
@@ -76,4 +93,69 @@ void NeuronLayer::RandomizeWeightAndBias(float_n min, float_n max)
 	}
 
 	bias = dist(rnd);
+}
+
+NeuronLayerInstance::NeuronLayerInstance(NeuronLayer* source)
+{
+	this->source = source;
+
+	for (auto& neuron : source->neurons)
+	{
+		neurons.push_back(new NeuronInstance(&neuron));
+	}
+
+	prevCount = source->prevCount;
+
+	bias = source->bias;
+}
+
+int NeuronLayerInstance::Count()
+{
+	return neurons.size();
+}
+
+NeuronInstance& NeuronLayerInstance::operator[](int index)
+{
+	return *neurons[index];
+}
+
+void NeuronLayerInstance::FeedBack()
+{
+	for (auto& neuronInstance : neurons)
+	{
+		neuronInstance->FeedBack();
+	}
+}
+
+void NeuronLayerInstance::Destroy()
+{
+	for (auto neuronInstance : neurons)
+		delete neuronInstance;
+
+	neurons.clear();
+}
+
+void NeuronLayerInstance::ClearSourceValue()
+{
+	source->ClearValues();
+}
+
+void NeuronLayerInstance::FetchBias()
+{
+	bias = source->bias;
+}
+
+void NeuronLayerInstance::PushDataFloat(float_n* data)
+{
+	for (int i = 0; i < neurons.size(); i++)
+		neurons[i]->value = data[i];
+}
+
+void NeuronLayer::ClearValues()
+{
+	for (auto& neuron : neurons)
+	{
+		neuron.value = 0.0;
+		neuron.error = 0.0;
+	}
 }

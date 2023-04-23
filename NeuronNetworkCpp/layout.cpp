@@ -338,14 +338,21 @@ namespace UI
 					int trainDataset = 0;
 					int verifyDataset = 0;
 
-					double learningRate = 0.1;
-					double threshold = 0.1;
+					float learningRate = 0.1;
+					float threshold = 90; // accuracy threshold
+
+					int batchSize = 1;
+
+					std::atomic<bool> stopSign = false;
+
+					Tasks::TrainParameters parameters(0, 0, 0, 0, 0, 0, 0); // default
 					
 					void TrainNetworkWork()
 					{
 						if (Tasks::taskProgress.Ready())
 						{
-							std::thread thread(Tasks::TrainNetwork, learningRate, threshold, trainDataset, verifyDataset, 1);
+							parameters = Tasks::TrainParameters(learningRate, threshold, trainDataset, verifyDataset, batchSize, 0, &stopSign);
+							std::thread thread(Tasks::TrainNetwork, parameters);
 							thread.detach();
 						}
 					}
@@ -712,17 +719,75 @@ namespace UI
 						Util::DatasetCombo("Train Dataset", &Train::trainDataset);
 						Util::DatasetCombo("Verify Dataset", &Train::verifyDataset);
 
-						ImGui::InputDouble("Learning Rate", &Train::learningRate, 0.001, 0.01, "%.6f");
-						ImGui::InputDouble("Loss Threshold", &Train::threshold, 0.001, 0.01, "%.6f");
-
-						// Clamp inputs
-						Clamp(Train::learningRate, 0.0, 1.0);
-						Clamp(Train::threshold, 0.0, 1.0);
-
-						if (ImGui::Button("Train " ICON_FLIGHT_TAKEOFF_FILL, ImVec2(70, 40)))
+						ImGui::BeginDisabled(Tasks::Instances::datasets.size() <= 0);
 						{
-							Train::TrainNetworkWork();
+							ImGui::InputInt("Batch Size", &Train::batchSize);
+							Clamp(Train::batchSize, 1, 4096);
+
+							ImGui::InputFloat("Learning Rate", &Train::learningRate, 0.001, 0.01, "%.6f");
+							ImGui::InputFloat("Accuracy Threshold", &Train::threshold, 1, 10, "%.1f%% max.");
+
+							// Clamp inputs
+							Clamp(Train::learningRate, 0.0, 1.0);
+							Clamp(Train::threshold, 0.0, 100.0);
+
+							if (ImGui::Button("Train " ICON_FLIGHT_TAKEOFF_FILL, ImVec2(70, 40)))
+							{
+								Train::TrainNetworkWork();
+							}
+
+							// stop button
+							ImGui::SameLine();
+							const std::string stopSignString[] = {"Stop " ICON_STOP_CIRCLE_FILL, "Signal Sent " ICON_SEND_PLANE_2_FILL};
+
+							ImGui::BeginDisabled(Tasks::taskProgress.state != Tasks::TaskState::Working);
+							if (ImGui::Button((stopSignString[Train::stopSign] + "##network_train_stop_button").c_str(), ImVec2(0, 40)))
+							{
+								Train::stopSign = true;
+							}
+							ImGui::EndDisabled();
 						}
+						ImGui::EndDisabled();
+
+						ImGui::NewLine();
+
+						// implot getter for data
+						const ImPlotGetter accuracyGetter = 
+							[](int index, void* data) 
+						{
+							std::vector<double>& list = (*(std::vector<double>*)data);
+							return ImPlotPoint(index + 1, list[index] * 100.0); 
+						};
+
+						//const ImPlotGetter zeroGetter = 
+						//	[](int index, void* data)
+						//{
+						//	//std::vector<double>& list = (*(std::vector<double>*)data);
+						//	return ImPlotPoint(index, 0.0);
+						//};
+
+						if (Tasks::Instances::trainAccuracyLog.size() > 0)
+						{
+							// display accuracy log
+							if (ImPlot::BeginPlot("Accuracy", ImVec2(-1, 0), ImPlotFlags_NoMenus | ImPlotFlags_NoMouseText | ImPlotFlags_NoFrame))
+							{
+								auto& parameters = Workload::NetworkInstance::Train::parameters;
+								const ImVec4 GoodColor(0.298, 0.6863, 0.3137, 1.0);
+
+								// setup axes
+								ImPlot::SetupAxes("Iterations", "Accuarcy", ImPlotAxisFlags_AutoFit, ImPlotAxisFlags_Lock);
+								ImPlot::SetupAxisLimits(ImAxis_Y1, 0.0, 100.0, ImPlotCond_Always);
+
+								ImPlot::SetNextMarkerStyle(ImPlotMarker_Circle);
+								ImPlot::PlotLineG("Accuracy%", accuracyGetter, &Tasks::Instances::trainAccuracyLog, Tasks::Instances::trainAccuracyLog.size());
+
+								ImPlot::TagY(parameters.threshold, GoodColor, "Target");
+								ImPlot::SetNextLineStyle(GoodColor, 2.0);
+								ImPlot::PlotInfLines("Threshold", &parameters.threshold, 1, ImPlotInfLinesFlags_Horizontal);
+								ImPlot::EndPlot();
+							}
+						}
+
 						ImGui::TreePop();
 					}
 

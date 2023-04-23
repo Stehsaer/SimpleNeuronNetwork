@@ -155,6 +155,9 @@
     <ClCompile Include="imgui\implot_demo.cpp">
       <Filter>Source Files\Imgui\Extensions</Filter>
     </ClCompile>
+    <ClCompile Include="NetworkTrain.cpp">
+      <Filter>Source Files\Network</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="NetworkStructure.h">

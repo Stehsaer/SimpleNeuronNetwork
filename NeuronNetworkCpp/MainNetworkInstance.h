@@ -48,7 +48,7 @@ extern serverStatus server_status;
 extern int progressSuccess; // -1: none; 0: fail; 1:success;
 extern bool trainTerminate;
 
-extern Network::Framework::FullConnNetwork* network;
+extern Network::Connectivity::FullConnNetwork* network;
 
 extern Network::NetworkDataSet datasets[MAX_DATASET_COUNT];
 

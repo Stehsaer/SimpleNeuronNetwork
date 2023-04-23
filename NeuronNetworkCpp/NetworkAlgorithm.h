@@ -70,12 +70,14 @@ namespace Network
 		/// Softmax
 		/// </summary>
 		void SoftMax(NeuronLayer& layer);
+		void SoftMax(NeuronLayerInstance& layer);
 
 		/// <summary>
 		/// Softmax
 		/// </summary>
 		/// <param name="target">Target Data used for error calculation</param>
 		void SoftMaxGetError(NeuronLayer& layer, float_n* target);
+		void SoftMaxGetError(NeuronLayerInstance& layer, float_n* target);
 	}
 
 	enum class ActivateFunctionType:int

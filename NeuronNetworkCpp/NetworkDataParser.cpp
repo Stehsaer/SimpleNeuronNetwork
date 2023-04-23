@@ -6,7 +6,7 @@
 #include <json/json.h>
 
 using namespace Network;
-using FCNetwork = Network::Framework::FullConnNetwork;
+using FCNetwork = Network::Connectivity::FullConnNetwork;
 
 /// <summary>
 /// Tell if the computer runs on a little-endian system

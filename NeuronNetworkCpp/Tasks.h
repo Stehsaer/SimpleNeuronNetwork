@@ -45,12 +45,14 @@ namespace Tasks
 		extern const std::string networkPath;
 
 		extern bool networkOccupied;
-		extern Network::Framework::FullConnNetwork* mainNetwork;
+		extern Network::Connectivity::FullConnNetwork* mainNetwork;
 		extern std::vector<Network::NetworkDataSet*> datasets;
 
 		//extern std::vector<FileInfo> datasetFiles;
 		extern std::vector<std::string> datasetDirs;
 		extern std::vector<FileInfo> networkFileList;
+
+		extern std::vector<double> trainAccuracyLog;
 
 		void ReadFileList(std::vector<FileInfo>& list, std::string path, std::initializer_list<const char*> filters);
 		void ReadDirList(std::vector<std::string>& list, std::string path);
@@ -59,6 +61,26 @@ namespace Tasks
 		bool AddDataset(Network::NetworkDataSet* dataset);
 	}
 
+	struct TrainParameters
+	{
+		typedef Network::float_n float_n;
+
+		float_n learningRate, threshold;
+		int batchSize;
+		int trainDataset, verifyDataset;
+
+		int maxIter; // max iterations to do
+		std::atomic<bool>* stopSign;
+
+		TrainParameters(float_n learningRate, float_n threshold, int trainDataset, int verifyDataset, int batchSize, int maxIter, std::atomic<bool>* stopSign)
+			: learningRate(learningRate),
+			threshold(threshold),
+			trainDataset(trainDataset), 
+			verifyDataset(verifyDataset),
+			batchSize(batchSize),
+			stopSign(stopSign){}
+	};
+
 	// work
 
 	void LoadDataset(std::string path, std::string name, bool flip);
@@ -66,9 +88,8 @@ namespace Tasks
 	void ReadNetwork(std::string path);
 	void SaveNetwork(std::string name);
 
-	void TrainNetwork(double learningRate, double threshold, int trainDataset, int verifyDataset, int batchSize = 1);
+	void TrainNetwork(TrainParameters parameters);
 	void VerifyNetwork(int verifyDataset);
-	
 }
 
 #endif

@@ -60,12 +60,14 @@ namespace Tasks
 		const std::string networkPath = "resources/models/";
 
 		bool networkOccupied = false;
-		Network::Framework::FullConnNetwork* mainNetwork = NULL;
+		Network::Connectivity::FullConnNetwork* mainNetwork = NULL;
 		std::vector<Network::NetworkDataSet*> datasets;
 
 		//std::vector<FileInfo> datasetFiles;
 		std::vector<std::string> datasetDirs;
 		std::vector<FileInfo> networkFileList;
+
+		std::vector<double> trainAccuracyLog;
 
 		void ReadFileList(std::vector<FileInfo>& list, std::string path, std::initializer_list<const char*> filters)
 		{
@@ -193,14 +195,14 @@ namespace Tasks
 
 			Network::ActivateFunctionType funcType = (Network::ActivateFunctionType)func;
 
-			Instances::mainNetwork = new Network::Framework::FullConnNetwork(inNeuronCount, outNeuronCount, hiddenNeuronCount, hiddenLayerCount, funcType);
+			Instances::mainNetwork = new Network::Connectivity::FullConnNetwork(inNeuronCount, outNeuronCount, hiddenNeuronCount, hiddenLayerCount, funcType);
 			Instances::mainNetwork->RandomizeAllWeights(0.1, 0.9);
 
 			Instances::networkOccupied = false;
 
 			taskProgress.Done(std::format("Network created in {}ms", timer.CountMs()));
 		}
-		catch(std::exception e)
+		catch (std::exception e)
 		{
 			taskProgress.Error(std::format("Error while creating network. Message: {}", e.what()).c_str());
 		}
@@ -245,7 +247,7 @@ namespace Tasks
 		}
 	}
 
-	void TrainNetwork(double learningRate, double threshold, int trainDataset, int verifyDataset, int batchSize)
+	void TrainNetwork(TrainParameters parameters)
 	{
 		try
 		{
@@ -258,26 +260,49 @@ namespace Tasks
 				return;
 			}
 
-			Instances::mainNetwork->learningRate = learningRate;
+			auto& trainSet = *Instances::datasets[parameters.trainDataset];
+			auto& verifySet = *Instances::datasets[parameters.verifyDataset];
 
-			auto& trainSet = *Instances::datasets[trainDataset];
-			auto& verifySet = *Instances::datasets[verifyDataset];
+			Instances::trainAccuracyLog.clear();
 
-			for (int i = 0; i < trainSet.Count(); i++)
+			if (parameters.batchSize <= 0)
 			{
-				if (i % 100 == 0)
-				{
-					taskProgress.Set((float)i / (float)trainSet.Count(), std::format("Training Network: {}/{}", i, trainSet.Count()));
-				}
-
-				Instances::mainNetwork->Train(trainSet[i], 1, threshold);
+				taskProgress.Error("Invalid Parameter: batchSize");
+				return;
 			}
 
-			taskProgress.Work("Verifying");
+			// progress callback
+			const std::function<void(int, int)> callbackFunc = [](int index, int total)
+			{
+				taskProgress.Set(
+					(float)index / (float)total,
+					std::format("Training {}/{}", index, total));
+			};
 
-			double accuracy = Instances::mainNetwork->GetAccuracyCallbackFloat(verifySet, &taskProgress.progress);
+			while (1)
+			{
+				Instances::mainNetwork->TrainBatched(trainSet, parameters.batchSize, parameters.learningRate, callbackFunc);
 
-			taskProgress.Done(std::format("Train Completed. Time: {}ms, Accuracy: {:.2f}%%", timer.CountMs(), accuracy * 100.0));
+				taskProgress.Work("Verifying");
+
+				double accuracy = Instances::mainNetwork->GetAccuracyCallbackFloat(verifySet, &taskProgress.progress);
+
+				Instances::trainAccuracyLog.push_back(accuracy);
+
+				if (accuracy * 100.0 >= parameters.threshold)
+				{
+					taskProgress.Done(std::format("Train Completed. Time: {}ms, Accuracy: {:.2f}%%", timer.CountMs(), accuracy * 100.0));
+					break;
+				}
+
+				if(parameters.stopSign!=nullptr)
+					if (*parameters.stopSign == true)
+					{
+						(*parameters.stopSign) = false;
+						taskProgress.Done(std::format("Train Process Interrupted. Accuracy: {:.2f}%%", accuracy * 100.0));
+						break;
+					}
+			}
 		}
 		catch (std::exception e)
 		{

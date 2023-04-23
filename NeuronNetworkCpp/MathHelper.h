@@ -2,8 +2,8 @@
 
 #include <math.h>
 
-template<typename T>
-inline void Clamp(T& val, T min, T max)
+template<typename T, typename T1, typename T2>
+inline void Clamp(T& val, T1 min, T2 max)
 {
 	if (val < min)
 	{

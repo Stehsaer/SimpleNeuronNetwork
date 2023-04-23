@@ -119,6 +119,31 @@ void Network::Algorithm::SoftMax(Network::NeuronLayer& layer)
 	}
 }
 
+void Network::Algorithm::SoftMax(Network::NeuronLayerInstance& layer)
+{
+	double sum = 0.0;
+	double biggestValue = layer[0].value;
+
+	// find largest value in neurons
+	for (int i = 0; i < layer.Count(); i++)
+	{
+		if (layer[i].value > biggestValue)
+			biggestValue = layer[i].value;
+	}
+
+	// add up sums
+	for (int i = 0; i < layer.Count(); i++)
+	{
+		sum += exp(layer[i].value - biggestValue);
+	}
+
+	// set values
+	for (int i = 0; i < layer.Count(); i++)
+	{
+		layer[i].value = exp(layer[i].value - biggestValue) / sum;
+	}
+}
+
 void Network::Algorithm::SoftMaxGetError(NeuronLayer& layer, float_n* target)
 {
 	for (int i = 0; i < layer.Count(); i++)
@@ -127,3 +152,10 @@ void Network::Algorithm::SoftMaxGetError(NeuronLayer& layer, float_n* target)
 	}
 }
 
+void Network::Algorithm::SoftMaxGetError(NeuronLayerInstance& layer, float_n* target)
+{
+	for (int i = 0; i < layer.Count(); i++)
+	{
+		layer[i].error = target[i] - layer[i].value;
+	}
+}
